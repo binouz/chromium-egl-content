@@ -1,0 +1,10 @@
+Target :
+- libffi
+- libnss
+- libfreetype
+- libglib
+- libfontconfig
+
+Host :
+- bison
+- gperf

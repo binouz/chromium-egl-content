@@ -1,0 +1,12 @@
+#ifndef UI_OZONE_PLATFORM_EGLCONTENT_CLIENT_NATIVE_PIXMAP_FACTORY_EGLCONTENT_H_
+# define UI_OZONE_PLATFORM_EGLCONTENT_CLIENT_NATIVE_PIXMAP_FACTORY_EGLCONTENT_H_
+
+namespace ui {
+
+  class ClientNativePixmapFactory;
+
+  ClientNativePixmapFactory* CreateClientNativePixmapFactoryEglcontent();
+
+}
+
+#endif /* !UI_OZONE_PLATFORM_EGLCONTENT_CLIENT_NATIVE_PIXMAP_FACTORY_EGLCONTENT.H */

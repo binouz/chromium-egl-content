@@ -1,0 +1,139 @@
+import("//content/eglcontent/egl_content.gni")
+import("//build/config/features.gni")
+import("//build/config/sanitizers/sanitizers.gni")
+import("//build/config/ui.gni")
+import("//media/media_options.gni")
+import("//tools/grit/repack.gni")
+import("//tools/grit/grit_rule.gni")
+
+# import("//build/config/linux/pkg_config.gni")
+
+group("eglcontent") {
+  deps = [ ":egl_content_lib" ]
+}
+
+shared_library("egl_content_lib") {
+  sources = [
+    "content/content_main_delegate.cc",
+    "content/content_main_delegate.h",
+    "content/content_client.cc",
+    "content/content_client.h",
+    "content/content_browser_client.cc",
+    "content/content_browser_client.h",
+    "content/content_renderer_client.cc",
+    "content/content_renderer_client.h",
+    "browser/browser.cc",
+    "browser/browser.h",
+    "browser/browser_main_parts.cc",
+    "browser/browser_main_parts.h",
+    "browser/browser_context.cc",
+    "browser/browser_context.h",
+    "browser/resource_context.cc",
+    "browser/resource_context.h",
+    "browser/url_request_context_getter.cc",
+    "browser/url_request_context_getter.h",
+    "browser/aura_screen.cc",
+    "browser/aura_screen.h",
+    "renderer/browser_host.cc",
+    "renderer/browser_host.h",
+    "api/eglcontent.cc",
+    "api/eglcontent.h",
+    "api/browser_config.h"
+  ]
+
+  configs += [
+    "//build/config:precompiled_headers",
+    # "//third_party/WebKit/public:debug_devtools",
+  ]
+
+  public_deps = [
+    "//content/public/app:both",
+    "//content/public/browser",
+    "//content/public/common",
+    "//content/public/renderer",
+    "//content/public/utility",
+  ]
+
+  deps = [
+    ":pak",
+    "//base",
+    "//third_party/boringssl",
+    "//components/guest_view/browser",
+    "//ui/aura",
+    "//ui/wm",
+    "//ui/views",
+    "//ui/ozone",
+    "//third_party/freetype2",
+    "//base/third_party/dynamic_annotations",
+    "//cc",
+    "//components/cdm/renderer",
+    "//components/plugins/renderer",
+    "//components/url_formatter",
+    "//components/web_cache/renderer",
+    "//content:resources",
+    "//content/app/resources",
+    "//content/app/strings",
+    "//content/gpu",
+    "//gin",
+    "//gpu",
+    "//ipc",
+    "//media",
+    "//net",
+    "//net:net_resources",
+    "//sandbox",
+    "//skia",
+    "//storage/browser",
+    "//third_party/WebKit/public:blink",
+    "//third_party/WebKit/public:image_resources",
+    "//third_party/WebKit/public:resources",
+    "//third_party/icu",
+    "//ui/base",
+    "//ui/base/ime",
+    "//ui/display",
+    "//ui/events:events_base",
+    "//ui/gfx",
+    "//ui/gfx/geometry",
+    "//ui/gfx/ipc",
+    "//ui/gfx/ipc/geometry",
+    "//ui/gfx/ipc/skia",
+    "//ui/gl",
+    "//url",
+    "//v8",
+  ]
+
+  configs += [ "//build/config/gcc:rpath_for_built_shared_libraries" ]
+
+  ldflags = [ "-fuse-ld=gold" ]
+}
+
+repack("pak") {
+  sources = [
+    "$root_gen_dir/blink/public/resources/blink_image_resources_100_percent.pak",
+    "$root_gen_dir/blink/public/resources/blink_resources.pak",
+    "$root_gen_dir/content/app/resources/content_resources_100_percent.pak",
+    "$root_gen_dir/content/app/strings/content_strings_en-US.pak",
+    "$root_gen_dir/content/browser/tracing/tracing_resources.pak",
+    "$root_gen_dir/content/content_resources.pak",
+    "$root_gen_dir/net/net_resources.pak",
+    "$root_gen_dir/ui/resources/ui_resources_100_percent.pak",
+    "$root_gen_dir/ui/resources/webui_resources.pak",
+    "$root_gen_dir/ui/strings/app_locale_settings_en-US.pak",
+    "$root_gen_dir/ui/strings/ui_strings_en-US.pak",
+    "$root_gen_dir/blink/devtools_resources.pak"
+  ]
+
+  deps = [
+    "//content:resources",
+    "//content/app/resources",
+    "//content/app/strings",
+    "//content/browser/tracing:resources",
+    "//net:net_resources",
+    "//third_party/WebKit/public:image_resources",
+    "//third_party/WebKit/public:resources",
+    "//ui/resources",
+    "//ui/strings",
+    "//content/browser/devtools:resources"
+  ]
+
+  output = "$root_out_dir/egl_content.pak"
+}

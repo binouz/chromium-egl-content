@@ -1,0 +1,45 @@
+diff -ur chromium-55.0.2883.59.orig/BUILD.gn ./chromium-55.0.2883.59/BUILD.gn
+--- chromium-55.0.2883.59.orig/BUILD.gn	2016-12-21 19:05:07.532747220 +0100
++++ ./chromium-55.0.2883.59/BUILD.gn	2017-01-07 22:57:47.589639873 +0100
+@@ -315,6 +315,7 @@
+       "//ui/gl:gl_unittests",
+       "//ui/touch_selection:ui_touch_selection_unittests",
+       "//url/ipc:url_ipc_unittests",
++      "//content/eglcontent"
+     ]
+   } else {
+     deps += [ "//ios:all" ]
+diff -ur chromium-55.0.2883.59.orig/ui/ozone/BUILD.gn ./chromium-55.0.2883.59/ui/ozone/BUILD.gn
+--- chromium-55.0.2883.59.orig/ui/ozone/BUILD.gn	2016-12-21 19:05:10.556725564 +0100
++++ ./chromium-55.0.2883.59/ui/ozone/BUILD.gn	2017-01-07 22:38:54.549434912 +0100
+@@ -51,6 +51,11 @@
+   ozone_platform_deps += [ "platform/x11" ]
+ }
+ 
++if (ozone_platform_eglcontent) {
++  ozone_platforms += [ "eglcontent" ]
++  ozone_platform_deps += [ "platform/eglcontent" ]
++}
++
+ platform_list_cc_file = "$target_gen_dir/platform_list.cc"
+ platform_list_h_file = "$target_gen_dir/platform_list.h"
+ platform_list_txt_file = "$target_gen_dir/platform_list.txt"
+diff -ur chromium-55.0.2883.59.orig/ui/ozone/ozone.gni ./chromium-55.0.2883.59/ui/ozone/ozone.gni
+--- chromium-55.0.2883.59.orig/ui/ozone/ozone.gni	2016-12-21 19:05:10.556725564 +0100
++++ ./chromium-55.0.2883.59/ui/ozone/ozone.gni	2017-01-07 22:40:24.668817361 +0100
+@@ -28,6 +28,7 @@
+   ozone_platform_headless = false
+   ozone_platform_x11 = false
+   ozone_platform_wayland = false
++  ozone_platform_eglcontent = false
+ 
+   if (ozone_auto_platforms) {
+     # Use headless as the default platform.
+@@ -60,5 +61,6 @@
+ 
+ assert(use_ozone || !(ozone_platform_caca || ozone_platform_cast ||
+                           ozone_platform_gbm || ozone_platform_headless ||
+-                          ozone_platform_x11 || ozone_platform_wayland),
++                          ozone_platform_x11 || ozone_platform_wayland ||
++                          ozone_platform_eglcontent),
+        "Must set use_ozone to select ozone platforms")

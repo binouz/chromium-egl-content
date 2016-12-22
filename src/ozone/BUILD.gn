@@ -1,0 +1,60 @@
+import("//content/eglcontent/egl_content.gni")
+import("//ui/ozone/ozone.gni")
+
+visibility = [ "//ui/ozone/*" ]
+
+group("eglcontent") {
+  deps = [ ":ozone_eglcontent" ]
+}
+
+source_set("ozone_eglcontent") {
+  sources = [
+    "client_native_pixmap_factory_eglcontent.cc",
+    "client_native_pixmap_factory_eglcontent.h",
+    "ozone_platform_eglcontent.cc",
+    "ozone_platform_eglcontent.h",
+    "gpu_platform_support_host.cc",
+    "gpu_platform_support_host.h",
+    "window_manager.cc",
+    "window_manager.h",
+    "cursor.cc",
+    "cursor.h",
+    "eglcontent_interface.cc",
+    "eglcontent_interface.h",
+    "gpu/gpu_messages.cc",
+    "gpu/gpu_messages.h",
+    "gpu/message_filter.cc",
+    "gpu/message_filter.h",
+    "gpu/surface_factory.cc",
+    "gpu/surface_factory.h",
+    "gpu/display.cc",
+    "gpu/display.h",
+    "gpu/window.cc",
+    "gpu/window.h",
+  ]
+
+  configs += [ "//third_party/khronos:khronos_headers" ]
+
+  libs = [ "dl" ]
+
+  deps = [
+    "//base",
+    "//skia",
+    "//ui/base",
+    "//ui/display",
+    "//ui/events",
+    "//ui/events/ozone:events_ozone",
+    "//ui/events/ozone:events_ozone_evdev",
+    "//ui/events/ozone:events_ozone_layout",
+    "//ui/events/platform",
+    "//ui/gl:gl",
+    "//ui/gfx",
+    "//ui/gfx/geometry",
+    "//ui/ozone:ozone_base",
+    "//ui/ozone/common",
+    "//ui/ozone/gl",
+    "//ui/platform_window",
+  ]
+
+  defines = [ "OZONE_IMPLEMENTATION" ]
+}
