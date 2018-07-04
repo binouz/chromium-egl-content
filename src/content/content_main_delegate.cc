@@ -45,16 +45,12 @@ namespace content {
     : browser_config_(config),
       main_delegate_(main_delegate),
       browser_delegate_(browser_delegate) {
-    LOG(INFO) << "EGLContentMainDelegate::EGLContentMainDelegate";
   }
 
   EGLContentMainDelegate::~EGLContentMainDelegate() {
-    LOG(INFO) << "EGLContentMainDelegate::~EGLContentMainDelegate";
   }
 
   bool EGLContentMainDelegate::BasicStartupComplete(int* exit_code) {
-    LOG(INFO) << "EGLContentMainDelegate::" << __FUNCTION__;
-
     base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
     std::string process_type =
       command_line->GetSwitchValueASCII(switches::kProcessType);
@@ -64,17 +60,12 @@ namespace content {
     content_client_.reset(new EGLContentClient(main_delegate_, browser_config_));
     SetContentClient(content_client_.get());
 
-    // Here we can set command line arguments
-    // command_line.AppendSwitch(switches::kDisableGpuRasterization);
-
     return false;
   }
 
   void EGLContentMainDelegate::PreSandboxStartup() {
-    LOG(INFO) << "EGLContentMainDelegate::" << __FUNCTION__;
     base::FilePath pak_file;
     PathService::Get(base::DIR_MODULE, &pak_file);
-    /* TODO : ASSERT res == true */
     pak_file = pak_file.Append(FILE_PATH_LITERAL("egl_content.pak"));
     ui::ResourceBundle::InitSharedInstanceWithPakPath(pak_file);
 
@@ -82,9 +73,6 @@ namespace content {
   }
 
   void EGLContentMainDelegate::SandboxInitialized(const std::string& process_type) {
-    LOG(INFO) << "EGLContentMainDelegate::" << __FUNCTION__;
-    // We should definitely let the user do something here, but we got nothing to do
-
     main_delegate_->AfterSandboxing();
   }
 
@@ -117,12 +105,9 @@ namespace content {
   }
 
   void EGLContentMainDelegate::ZygoteForked() {
-    LOG(INFO) << "EGLContentMainDelegate::ZygoteForked";
   }
 
   ContentBrowserClient* EGLContentMainDelegate::CreateContentBrowserClient() {
-    LOG(INFO) << "EGLContentMainDelegate::CreateContentBrowserClient";
-
     browser_client_.reset(
       new EGLContentBrowserClient(browser_config_,
 				  browser_delegate_));
@@ -131,7 +116,6 @@ namespace content {
   }
 
   ContentRendererClient* EGLContentMainDelegate::CreateContentRendererClient() {
-    LOG(INFO) << "EGLContentMainDelegate::" << __FUNCTION__;
     renderer_client_.reset(new EGLContentRendererClient(main_delegate_));
 
     return renderer_client_.get();

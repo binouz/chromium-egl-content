@@ -33,7 +33,6 @@ namespace content {
 
   void EGLContentBrowser::Initialise(EGLContent::BrowserConfig& config,
 				     EGLContent::BrowserDelegate* delegate) {
-    LOG(INFO) << "EGLContentBrowser::Initialise: delegate=" << (void*) delegate;
     g_browser.reset(new EGLContentBrowser(delegate));
     g_browser->CreateBrowserContext(config);
     g_browser->CreateWindow(config);
@@ -58,9 +57,6 @@ namespace content {
   }
 
   void EGLContentBrowser::CreateWindow(EGLContent::BrowserConfig& config) {
-    LOG(INFO) << "EGLContentBrowser::" << __FUNCTION__
-	      << " size.width=" << config.screen_width
-	      << " size.height=" << config.screen_height;
     gfx::Size window_size = gfx::Size(config.screen_width, config.screen_height);
     screen_.reset(
       new EGLContentAuraScreen(window_size, config.scale_factor));
@@ -92,34 +88,27 @@ namespace content {
   }
 
   void EGLContentBrowser::Ready() {
-    LOG(INFO) << "EGLContentBrowser::Ready";
     if (delegate_)
       delegate_->BrowserCreated(this);
   }
 
   void EGLContentBrowser::LoadingStateChanged(WebContents* source, bool to_different_document) {
-    LOG(INFO) << "EGLContentBrowser::LoadingStateChanged: loading="
-	      << (source->IsLoading() ? "TRUE" : "FALSE");
     if (delegate_)
       delegate_->LoadingStateChanged(source->IsLoading());
   }
 
   void EGLContentBrowser::LoadProgressChanged(WebContents* source, double progress) {
-    LOG(INFO) << "EGLContentBrowser::LoadingProgressChanged: progress="
-	      << progress;
     if (delegate_)
       delegate_->LoadProgressed(progress);
   }
 
   void EGLContentBrowser::UpdateTargetURL(WebContents* source, const GURL& url) {
     std::string str = url.spec();
-    LOG(INFO) << "EGLContentBrowser::UpdateTargetURL: url=" << str;
     if (delegate_)
       delegate_->TargetURLChanged(str);
   }
 
   void EGLContentBrowser::LoadURL(std::string& url) {
-    LOG(INFO) << "EGLContentBrowser::LoadURL: url=" << url;
     GURL gurl(url);
     NavigationController::LoadURLParams params(gurl);
     params.transition_type = ui::PageTransitionFromInt(
@@ -129,39 +118,31 @@ namespace content {
   }
 
   std::string EGLContentBrowser::GetURL() {
-    LOG(INFO) << "EGLContentBrowser::GetURL";
     return web_contents_->GetVisibleURL().spec();
   }
 
   void EGLContentBrowser::Stop() {
-    LOG(INFO) << "EGLContentBrowser::Stop";
     web_contents_->Stop();
   }
 
   bool EGLContentBrowser::IsLoading() {
-    LOG(INFO) << "EGLContentBrowser::IsLoading";
     return web_contents_->IsLoading();
   }
 
   bool EGLContentBrowser::IsAudioMuted() {
-    LOG(INFO) << "EGLContentBrowser::IsAudioMuted";
     return web_contents_->IsAudioMuted();
   }
 
   void EGLContentBrowser::SetAudioMuted(bool mute) {
-    LOG(INFO) << "EGLContentBrowser::SetAudioMuted: " << (mute ? "TRUE" : "FALSE");
     web_contents_->SetAudioMuted(mute);
   }
 
   bool EGLContentBrowser::IsCrashed() const {
-    LOG(INFO) << "EGLContentBrowser::IsCrashed";
     return web_contents_->IsCrashed();
   }
 
   void EGLContentBrowser::Reload() {
-    LOG(INFO) << "EGLContentBrowser::Reload";
     web_contents_->GetController().Reload(false);
   }
-
 
 }

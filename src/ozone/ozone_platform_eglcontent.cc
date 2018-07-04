@@ -59,54 +59,44 @@ namespace ui {
         }
 
         SurfaceFactoryOzone* GetSurfaceFactoryOzone() override {
-	  LOG(INFO) << "EGLContentOzonePlatform::" << __FUNCTION__;
           return surface_factory_.get();
         }
 
         OverlayManagerOzone* GetOverlayManager() override {
-	  LOG(INFO) << "EGLContentOzonePlatform::" << __FUNCTION__;
           return overlay_manager_.get();
         }
 
         CursorFactoryOzone* GetCursorFactoryOzone() override {
-	  LOG(INFO) << "EGLContentOzonePlatform::" << __FUNCTION__;
           return cursor_factory_.get();
         }
 
         InputController* GetInputController() override {
-	  LOG(INFO) << "EGLContentOzonePlatform::" << __FUNCTION__;
           return event_factory_->input_controller();
         }
 
 	IPC::MessageFilter* GetGpuMessageFilter() override {
-	  LOG(INFO) << "EGLContentOzonePlatform::" << __FUNCTION__;
 	  return gpu_message_filter_.get();
 	}
 
         GpuPlatformSupportHost* GetGpuPlatformSupportHost() override {
-	  LOG(INFO) << "EGLContentOzonePlatform::" << __FUNCTION__;
           return gpu_platform_support_host_.get();
         }
 
         std::unique_ptr<SystemInputInjector> CreateSystemInputInjector() override {
-	  LOG(INFO) << "EGLContentOzonePlatform::" << __FUNCTION__;
           return event_factory_->CreateSystemInputInjector();
         }
 
         std::unique_ptr<PlatformWindow> CreatePlatformWindow(
 	  PlatformWindowDelegate* window_delegate, const gfx::Rect& bounds) override {
-	  LOG(INFO) << "EGLContentOzonePlatform::" << __FUNCTION__;;
           return base::WrapUnique<PlatformWindow>(
 	    window_manager_->CreateWindow(window_delegate, bounds));
         }
 
         std::unique_ptr<NativeDisplayDelegate> CreateNativeDisplayDelegate() override {
-	  LOG(INFO) << "EGLContentOzonePlatform::" << __FUNCTION__;
           return base::MakeUnique<display::FakeDisplayDelegate>();
         }
 
         void InitializeUI() override {
-	  LOG(INFO) << "EGLContentOzonePlatform::" << __FUNCTION__;
 	  gpu_platform_support_host_.reset(new EGLContentGPUPlatformSupportHost());
 	  window_manager_.reset(
 	    new EGLContentWindowManager(gpu_platform_support_host_.get()));
@@ -123,8 +113,6 @@ namespace ui {
 	}
 
         void InitializeGPU() override {
-	  LOG(INFO) << "EGLContentOzonePlatform::" << __FUNCTION__;
-
 	  gpu_message_filter_.reset(
 	    new EGLContentGPUMessageFilter(display_delegate_));
 	  surface_factory_.reset(

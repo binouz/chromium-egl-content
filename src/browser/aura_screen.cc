@@ -151,9 +151,6 @@ namespace content {
   }
 
   void EGLContentAuraScreen::Initialise() {
-    LOG(INFO) << "EGLContentAuraScreen::" << __FUNCTION__
-	      << " size.width=" << display_.GetSizeInPixel().width()
-	      << " size.height=" << display_.GetSizeInPixel().height();;
     host_.reset(aura::WindowTreeHost::Create(gfx::Rect(display_.GetSizeInPixel())));
     host_->InitHost();
     host_->window()->SetLayoutManager(new FillLayout(host_->window()));

@@ -29,15 +29,12 @@ namespace content {
   }
 
   void EGLContentRendererClient::RenderThreadStarted() {
-    LOG(INFO) << "EGLContentMainDelegate::RenderThreadStarted";
   }
 
   void EGLContentRendererClient::RenderFrameCreated(RenderFrame* render_frame) {
-    LOG(INFO) << "EGLContentMainDelegate::RenderFrameCreated";
   }
 
   void EGLContentRendererClient::RenderViewCreated(RenderView* render_view) {
-    LOG(INFO) << "EGLContentMainDelegate::RenderViewCreated";
   }
 
   void EGLContentRendererClient::CreateBrowser(RenderView* render_view, RenderFrame* render_frame) {
