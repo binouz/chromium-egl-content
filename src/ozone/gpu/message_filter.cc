@@ -74,12 +74,13 @@ namespace ui {
 
   void EGLContentGPUMessageFilter::OnCreateWindow(int32_t id) {
     base::AutoLock auto_lock(lock_);
-    windows_[id].reset(new EGLContentWindow(delegate_));
+    if (windows_.find(id) != windows_.end())
+      windows_[id].reset(new EGLContentWindow(delegate_));
   }
 
   void EGLContentGPUMessageFilter::OnReleaseWindow(int32_t id) {
     base::AutoLock auto_lock(lock_);
-    if (windows_.find(id) != windows_.end())
+    if (windows_.find(id) == windows_.end())
       windows_[id].reset();
   }
 
@@ -90,6 +91,11 @@ namespace ui {
 
   EGLContentWindow* EGLContentGPUMessageFilter::GetWindow(int32_t id) {
     base::AutoLock auto_lock(lock_);
+    // Hack for single-process where the window creation message no has arrived
+    // yet. So we create the window here.
+    // TODO : Find a better way to do this.
+    if (windows_.find(id) == windows_.end() || windows_[id].get() == NULL)
+      windows_[id].reset(new EGLContentWindow(delegate_));
     return windows_[id].get();
   }
 
