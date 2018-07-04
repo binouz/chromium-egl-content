@@ -47,7 +47,14 @@ namespace content {
       void UpdateTargetURL(WebContents* source, const GURL& url) override;
 
       // EGLContent::BrowserDelegate::Controller
-      void LoadURL(std::string& url);
+      void LoadURL(std::string& url) override;
+      void Stop() override;
+      void Reload() override;
+      std::string GetURL() override;
+      bool IsLoading() override;
+      bool IsAudioMuted() override;
+      void SetAudioMuted(bool mute) override;
+      bool IsCrashed() const override;
 
     private:
 

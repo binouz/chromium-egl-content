@@ -112,9 +112,7 @@ namespace content {
   }
 
   void EGLContentBrowser::UpdateTargetURL(WebContents* source, const GURL& url) {
-    std::string scheme = url.scheme_piece().as_string();
-    std::string content = url.GetContent();
-    std::string str = scheme + ":" + content;
+    std::string str = url.spec();
     LOG(INFO) << "EGLContentBrowser::UpdateTargetURL: url=" << str;
     if (delegate_)
       delegate_->TargetURLChanged(str);
@@ -129,5 +127,41 @@ namespace content {
     web_contents_->GetController().LoadURLWithParams(params);
     web_contents_->Focus();
   }
+
+  std::string EGLContentBrowser::GetURL() {
+    LOG(INFO) << "EGLContentBrowser::GetURL";
+    return web_contents_->GetVisibleURL().spec();
+  }
+
+  void EGLContentBrowser::Stop() {
+    LOG(INFO) << "EGLContentBrowser::Stop";
+    web_contents_->Stop();
+  }
+
+  bool EGLContentBrowser::IsLoading() {
+    LOG(INFO) << "EGLContentBrowser::IsLoading";
+    return web_contents_->IsLoading();
+  }
+
+  bool EGLContentBrowser::IsAudioMuted() {
+    LOG(INFO) << "EGLContentBrowser::IsAudioMuted";
+    return web_contents_->IsAudioMuted();
+  }
+
+  void EGLContentBrowser::SetAudioMuted(bool mute) {
+    LOG(INFO) << "EGLContentBrowser::SetAudioMuted: " << (mute ? "TRUE" : "FALSE");
+    web_contents_->SetAudioMuted(mute);
+  }
+
+  bool EGLContentBrowser::IsCrashed() const {
+    LOG(INFO) << "EGLContentBrowser::IsCrashed";
+    return web_contents_->IsCrashed();
+  }
+
+  void EGLContentBrowser::Reload() {
+    LOG(INFO) << "EGLContentBrowser::Reload";
+    web_contents_->GetController().Reload(false);
+  }
+
 
 }

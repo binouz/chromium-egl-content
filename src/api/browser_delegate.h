@@ -26,6 +26,13 @@ namespace EGLContent {
 	public:
 
 	  virtual void LoadURL(std::string& url) = 0;
+	  virtual void Stop() = 0;
+	  virtual void Reload() = 0;
+	  virtual std::string GetURL() = 0;
+	  virtual bool IsLoading() = 0;
+	  virtual bool IsAudioMuted() = 0;
+	  virtual void SetAudioMuted(bool mute) = 0;
+	  virtual bool IsCrashed() const = 0;
       };
 
       BrowserDelegate() {}
