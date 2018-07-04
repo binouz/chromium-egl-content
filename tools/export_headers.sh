@@ -39,5 +39,5 @@ find ${rootdir}/src/api -name '*.h' -exec cp {} ${outdir}/eglcontent \;
 
 FILES=`find ${outdir}/eglcontent -name '*.h'`
 for f in $FILES; do
-    sed -i 's/^#include "third_party/(.*)"$/#include <\1>/g' $f
+    sed -i 's/#include "third_party\/khronos\/\(.*\)"$/#include <\1>/g' $f
 done

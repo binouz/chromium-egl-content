@@ -27,7 +27,8 @@ export:
 		$(BUILD_OUTPUT_DIRECTORY)
 
 examples:
-	make -C examples/desktop-demo
+	make -C examples/desktop-demo TOPDIR=$(TOPDIR) \
+		BUILD_OUTPUT_DIRECTORY=$(BUILD_OUTPUT_DIRECTORY)
 
 #install: all
 #	install -d out/eglcontent /usr/include
@@ -37,3 +38,5 @@ examples:
 clean:
 	rm -rf out
 	rm -rf $(TOPDIR)/$(CHROMIUM_CHECKOUT)
+
+.PHONY: examples
