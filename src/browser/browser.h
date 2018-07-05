@@ -64,6 +64,11 @@ namespace content {
       void CreateWindow(EGLContent::BrowserConfig& config);
       void Ready();
 
+      void LoadURLTask(std::string url);
+      void StopTask();
+      void SetAudioMutedTask(bool mute);
+      void ReloadTask();
+
       static std::unique_ptr<EGLContentBrowser> g_browser;
 
       std::unique_ptr<EGLContentAuraScreen> screen_;

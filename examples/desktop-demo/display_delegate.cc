@@ -26,7 +26,6 @@ DemoDisplayDelegate::~DemoDisplayDelegate() {
 }
 
 EGLNativeDisplayType DemoDisplayDelegate::CreateNativeDisplay() {
-  std::cout << "DemoDisplayDelegate::" << __FUNCTION__ << std::endl;
   x_display_ = XOpenDisplay(NULL);
   return x_display_;
 }
@@ -35,7 +34,6 @@ void DemoDisplayDelegate::ReleaseNativeDisplay() {
 }
 
 EGLNativeWindowType DemoDisplayDelegate::CreateNativeWindow() {
-  std::cout << "DemoDisplayDelegate::" << __FUNCTION__ << std::endl;
   int num_visuals, screen;
   unsigned long mask;
   Window root;
@@ -54,21 +52,17 @@ EGLNativeWindowType DemoDisplayDelegate::CreateNativeWindow() {
 }
 
 void DemoDisplayDelegate::ReleaseNativeWindow() {
-  std::cout << "DemoDisplayDelegate::" << __FUNCTION__ << std::endl;
 }
 
 bool DemoDisplayDelegate::Resize(int size, int height, float scale_factor) {
-  std::cout << "DemoDisplayDelegate::" << __FUNCTION__ << std::endl;
 }
 
 void DemoDisplayDelegate::GetSize(int* width, int* height) {
-  std::cout << "DemoDisplayDelegate::" << __FUNCTION__ << std::endl;
   *width = width_;
   *height = height_;
 }
 
 char *DemoDisplayDelegate::EGLLibraryName() {
-  std::cout << "DemoDisplayDelegate::" << __FUNCTION__ << std::endl;
 #ifdef USE_NVIDIA
   return "libEGL_nvidia.so.0";
 #else
@@ -77,7 +71,6 @@ char *DemoDisplayDelegate::EGLLibraryName() {
 }
 
 char *DemoDisplayDelegate::GLESLibraryName() {
-  std::cout << "DemoDisplayDelegate::" << __FUNCTION__ << std::endl;
 #ifdef USE_NVIDIA
   return "libGLESv2_nvidia.so.367.57";
 #else

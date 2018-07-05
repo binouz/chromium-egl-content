@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "base/bind.h"
+
 #include "ui/aura/window.h"
 
 #include "content/public/browser/browser_thread.h"
@@ -109,12 +111,9 @@ namespace content {
   }
 
   void EGLContentBrowser::LoadURL(std::string& url) {
-    GURL gurl(url);
-    NavigationController::LoadURLParams params(gurl);
-    params.transition_type = ui::PageTransitionFromInt(
-      ui::PAGE_TRANSITION_TYPED | ui::PAGE_TRANSITION_FROM_ADDRESS_BAR);
-    web_contents_->GetController().LoadURLWithParams(params);
-    web_contents_->Focus();
+    BrowserThread::PostTask(
+      BrowserThread::UI, FROM_HERE,
+      base::Bind(&EGLContentBrowser::LoadURLTask, base::Unretained(this), url));
   }
 
   std::string EGLContentBrowser::GetURL() {
@@ -122,7 +121,9 @@ namespace content {
   }
 
   void EGLContentBrowser::Stop() {
-    web_contents_->Stop();
+    BrowserThread::PostTask(
+      BrowserThread::UI, FROM_HERE,
+      base::Bind(&EGLContentBrowser::StopTask, base::Unretained(this)));
   }
 
   bool EGLContentBrowser::IsLoading() {
@@ -134,7 +135,9 @@ namespace content {
   }
 
   void EGLContentBrowser::SetAudioMuted(bool mute) {
-    web_contents_->SetAudioMuted(mute);
+    BrowserThread::PostTask(
+      BrowserThread::UI, FROM_HERE,
+      base::Bind(&EGLContentBrowser::SetAudioMutedTask, base::Unretained(this), mute));
   }
 
   bool EGLContentBrowser::IsCrashed() const {
@@ -142,6 +145,29 @@ namespace content {
   }
 
   void EGLContentBrowser::Reload() {
+    BrowserThread::PostTask(
+      BrowserThread::UI, FROM_HERE,
+      base::Bind(&EGLContentBrowser::ReloadTask, base::Unretained(this)));
+  }
+
+  void EGLContentBrowser::LoadURLTask(std::string url) {
+    GURL gurl(url);
+    NavigationController::LoadURLParams params(gurl);
+    params.transition_type = ui::PageTransitionFromInt(
+      ui::PAGE_TRANSITION_TYPED | ui::PAGE_TRANSITION_FROM_ADDRESS_BAR);
+    web_contents_->GetController().LoadURLWithParams(params);
+    web_contents_->Focus();
+  }
+
+  void EGLContentBrowser::StopTask() {
+    web_contents_->Stop();
+  }
+
+  void EGLContentBrowser::SetAudioMutedTask(bool mute) {
+    web_contents_->SetAudioMuted(mute);
+  }
+
+  void EGLContentBrowser::ReloadTask() {
     web_contents_->GetController().Reload(false);
   }
 

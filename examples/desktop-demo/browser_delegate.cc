@@ -18,7 +18,6 @@
 #include "browser_delegate.h"
 
 DemoBrowserDelegate::DemoBrowserDelegate() {
-  std::cout << "DemoBrowserDelegate::DemoBrowserDelegate" << std::endl;
 }
 
 DemoBrowserDelegate::~DemoBrowserDelegate() {
@@ -26,7 +25,17 @@ DemoBrowserDelegate::~DemoBrowserDelegate() {
 
 void DemoBrowserDelegate::BrowserCreated(
   EGLContent::BrowserDelegate::Controller* controller) {
-  std::cout << "DemoBrowserDelegate::BrowserCreated" << std::endl;
-  std::string url("http://www.google.com/");
-  controller->LoadURL(url);
+  cmd_interface_.Initialise(controller);
+}
+
+void DemoBrowserDelegate::LoadingStateChanged(bool loading) {
+  cmd_interface_.LoadingStateChanged(loading);
+}
+
+void DemoBrowserDelegate::LoadProgressed(double progress) {
+  cmd_interface_.LoadProgressed(progress);
+}
+
+void DemoBrowserDelegate::TargetURLChanged(std::string& url) {
+  cmd_interface_.TargetURLChanged(url);
 }

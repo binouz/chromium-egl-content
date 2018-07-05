@@ -12,29 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BROWSER_DELEGATE_H_
-# define BROWSER_DELEGATE_H_
+#ifndef COMMAND_LINE_INTERFACE_H_
+# define COMMAND_LINE_INTERFACE_H_
+
+#include <string>
+#include <thread>
 
 #include <eglcontent/browser_delegate.h>
 
-#include "command_line_interface.h"
-
-class DemoBrowserDelegate : public EGLContent::BrowserDelegate {
+class CommandLineInterface {
 
   public:
+    CommandLineInterface();
+    ~CommandLineInterface();
 
-    DemoBrowserDelegate();
-    ~DemoBrowserDelegate();
+    void Initialise(
+      EGLContent::BrowserDelegate::Controller* controller);
+    void Run();
 
-    void BrowserCreated(EGLContent::BrowserDelegate::Controller* controller) override;
-    void LoadingStateChanged(bool loading) override;
-    void LoadProgressed(double progress) override;
-    void TargetURLChanged(std::string& url) override;
+    void LoadingStateChanged(bool loading);
+    void LoadProgressed(double progress);
+    void TargetURLChanged(std::string& url);
 
   private:
 
-    CommandLineInterface cmd_interface_;
-
+    EGLContent::BrowserDelegate::Controller* controller_;
+    std::thread thread_;
 };
 
-#endif /* !BROWSER_DELEGATE.H */
+#endif /* !COMMAND_LINE_INTERFACE.H */
