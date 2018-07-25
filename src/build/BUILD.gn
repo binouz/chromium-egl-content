@@ -48,8 +48,6 @@ shared_library("egl_content_lib") {
     "browser/url_request_context_getter.h",
     "browser/aura_screen.cc",
     "browser/aura_screen.h",
-    "renderer/browser_host.cc",
-    "renderer/browser_host.h",
     "api/eglcontent.cc",
     "api/eglcontent.h",
     "api/browser_config.h"
@@ -57,7 +55,6 @@ shared_library("egl_content_lib") {
 
   configs += [
     "//build/config:precompiled_headers",
-    # "//third_party/WebKit/public:debug_devtools",
   ]
 
   public_deps = [
@@ -66,6 +63,7 @@ shared_library("egl_content_lib") {
     "//content/public/common",
     "//content/public/renderer",
     "//content/public/utility",
+    "//tools/v8_context_snapshot:v8_context_snapshot"
   ]
 
   deps = [
@@ -77,7 +75,7 @@ shared_library("egl_content_lib") {
     "//ui/wm",
     "//ui/views",
     "//ui/ozone",
-    "//third_party/freetype2",
+    "//build/config/freetype",
     "//base/third_party/dynamic_annotations",
     "//cc",
     "//components/cdm/renderer",
@@ -97,9 +95,9 @@ shared_library("egl_content_lib") {
     "//sandbox",
     "//skia",
     "//storage/browser",
-    "//third_party/WebKit/public:blink",
-    "//third_party/WebKit/public:image_resources",
-    "//third_party/WebKit/public:resources",
+    "//third_party/blink/public:blink",
+    "//third_party/blink/public:image_resources",
+    "//third_party/blink/public:resources",
     "//third_party/icu",
     "//ui/base",
     "//ui/base/ime",
@@ -117,23 +115,23 @@ shared_library("egl_content_lib") {
 
   configs += [ "//build/config/gcc:rpath_for_built_shared_libraries" ]
 
-  ldflags = [ "-fuse-ld=gold" ]
+#  ldflags = [ "-fuse-ld=gold" ]
 }
 
 repack("pak") {
   sources = [
-    "$root_gen_dir/blink/public/resources/blink_image_resources_100_percent.pak",
-    "$root_gen_dir/blink/public/resources/blink_resources.pak",
     "$root_gen_dir/content/app/resources/content_resources_100_percent.pak",
     "$root_gen_dir/content/app/strings/content_strings_en-US.pak",
     "$root_gen_dir/content/browser/tracing/tracing_resources.pak",
     "$root_gen_dir/content/content_resources.pak",
+    "$root_gen_dir/mojo/public/js/mojo_bindings_resources.pak",
     "$root_gen_dir/net/net_resources.pak",
+    "$root_gen_dir/third_party/blink/public/resources/blink_resources.pak",
+    "$root_gen_dir/third_party/blink/public/resources/blink_scaled_resources_100_percent.pak",
     "$root_gen_dir/ui/resources/ui_resources_100_percent.pak",
     "$root_gen_dir/ui/resources/webui_resources.pak",
     "$root_gen_dir/ui/strings/app_locale_settings_en-US.pak",
     "$root_gen_dir/ui/strings/ui_strings_en-US.pak",
-    "$root_gen_dir/blink/devtools_resources.pak"
   ]
 
   deps = [
@@ -141,9 +139,10 @@ repack("pak") {
     "//content/app/resources",
     "//content/app/strings",
     "//content/browser/tracing:resources",
+    "//mojo/public/js:resources",
     "//net:net_resources",
-    "//third_party/WebKit/public:image_resources",
-    "//third_party/WebKit/public:resources",
+    "//third_party/blink/public:resources",
+    "//third_party/blink/public:scaled_resources_100_percent",
     "//ui/resources",
     "//ui/strings",
     "//content/browser/devtools:resources"

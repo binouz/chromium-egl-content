@@ -14,8 +14,6 @@
 
 #include "main_delegate.h"
 
-#include <eglcontent/browser_host.h>
-
 #include <iostream>
 
 DemoMainDelegate::DemoMainDelegate() {

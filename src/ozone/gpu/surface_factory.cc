@@ -48,7 +48,7 @@ namespace ui {
 	  EGLContentWindow* window = message_filter_->GetWindow(widget);
 
 	  return gl::InitializeGLSurface(
-	    new gl::NativeViewGLSurfaceEGL(window->GetNativeWindow()));
+	    new gl::NativeViewGLSurfaceEGL(window->GetNativeWindow(), NULL));
 	}
 
 	scoped_refptr<gl::GLSurface> CreateOffscreenGLSurface(
@@ -62,10 +62,45 @@ namespace ui {
 	    message_filter_->GetNativeDisplay());
 	}
 
-	bool LoadGLES2Bindings() override {
-	  return LoadEGLGLES2Bindings(
-	    message_filter_->GetDisplayDelegate()->EGLLibraryName(),
-	    message_filter_->GetDisplayDelegate()->GLESLibraryName());
+	bool LoadGLES2Bindings(gl::GLImplementation implementation) override {
+          base::NativeLibraryLoadError error;
+
+          std::string gles_library_path =
+            message_filter_->GetDisplayDelegate()->GLESLibraryName();
+          std::string egl_library_path =
+            message_filter_->GetDisplayDelegate()->EGLLibraryName();
+
+          base::NativeLibrary gles_library =
+            base::LoadNativeLibrary(base::FilePath(gles_library_path), &error);
+          if (!gles_library) {
+            LOG(ERROR) << "Failed to load GLES library: " << error.ToString();
+            return false;
+          }
+
+          base::NativeLibrary egl_library =
+            base::LoadNativeLibrary(base::FilePath(egl_library_path), &error);
+          if (!egl_library) {
+            LOG(ERROR) << "Failed to load EGL library: " << error.ToString();
+            base::UnloadNativeLibrary(gles_library);
+            return false;
+          }
+
+          gl::GLGetProcAddressProc get_proc_address =
+            reinterpret_cast<gl::GLGetProcAddressProc>(
+              base::GetFunctionPointerFromNativeLibrary(egl_library,
+                                                        "eglGetProcAddress"));
+          if (!get_proc_address) {
+            LOG(ERROR) << "eglGetProcAddress not found.";
+            base::UnloadNativeLibrary(egl_library);
+            base::UnloadNativeLibrary(gles_library);
+            return false;
+          }
+
+          gl::SetGLGetProcAddressProc(get_proc_address);
+          gl::AddGLNativeLibrary(egl_library);
+          gl::AddGLNativeLibrary(gles_library);
+
+          return true;
 	}
 
       private:

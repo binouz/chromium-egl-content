@@ -33,13 +33,17 @@ namespace ui {
       // GpuPlatformSupportHost
       void OnGpuProcessLaunched(
 	int host_id,
+	scoped_refptr<base::SingleThreadTaskRunner> ui_runner,
 	scoped_refptr<base::SingleThreadTaskRunner> send_runner,
 	const base::Callback<void(IPC::Message*)>& sender) override;
-      void OnChannelEstablished() override;
       void OnChannelDestroyed(int host_id) override;
+      void OnGpuServiceLaunched(
+        scoped_refptr<base::SingleThreadTaskRunner> host_runner,
+        scoped_refptr<base::SingleThreadTaskRunner> io_runner,
+        GpuHostBindInterfaceCallback binder) override;
 
       // IPC::Listener
-      bool OnMessageReceived(const IPC::Message& message) override;
+      void OnMessageReceived(const IPC::Message& message) override;
 
       // Custom
       void CreateWindow(int32_t id);
@@ -51,12 +55,12 @@ namespace ui {
       void ReleaseWindowOnSenderThread(int32_t id);
 
       int host_id_;
-      bool channel_established_;
+      bool service_launched_;
+
+      std::vector<int32_t> pending_window_creations_;
 
       scoped_refptr<base::SingleThreadTaskRunner> send_runner_;
       base::Callback<void(IPC::Message*)> send_callback_;
-
-      std::vector<int32_t> pending_window_creations_;
 
       DISALLOW_COPY_AND_ASSIGN(EGLContentGPUPlatformSupportHost);
   };

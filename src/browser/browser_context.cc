@@ -109,4 +109,12 @@ namespace content {
     return NULL;
   }
 
+  BackgroundFetchDelegate* EGLContentBrowserContext::GetBackgroundFetchDelegate() {
+    return nullptr;
+  }
+
+  BrowsingDataRemoverDelegate*
+  EGLContentBrowserContext::GetBrowsingDataRemoverDelegate() {
+    return nullptr;
+  }
 }

@@ -66,8 +66,8 @@ source_set("ozone_eglcontent") {
     "//ui/gfx/geometry",
     "//ui/ozone:ozone_base",
     "//ui/ozone/common",
-    "//ui/ozone/gl",
     "//ui/platform_window",
+    "//ui/display/manager",
   ]
 
   defines = [ "OZONE_IMPLEMENTATION" ]

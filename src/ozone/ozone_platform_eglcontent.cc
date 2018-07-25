@@ -20,14 +20,13 @@
 #include "ui/ozone/public/cursor_factory_ozone.h"
 #include "ui/ozone/public/input_controller.h"
 #include "ui/ozone/public/gpu_platform_support_host.h"
-#include "ui/ozone/public/system_input_injector.h"
 #include "ui/ozone/common/stub_overlay_manager.h"
-#include "ui/ozone/common/native_display_delegate_ozone.h"
 #include "ui/events/ozone/device/device_manager.h"
 #include "ui/events/ozone/layout/keyboard_layout_engine_manager.h"
 #include "ui/events/ozone/layout/stub/stub_keyboard_layout_engine.h"
 #include "ui/events/ozone/evdev/event_factory_evdev.h"
-#include "ui/display/fake_display_delegate.h"
+#include "ui/events/system_input_injector.h"
+#include "ui/display/manager/fake_display_delegate.h"
 
 #include "ui/ozone/platform/eglcontent/ozone_platform_eglcontent.h"
 #include "ui/ozone/platform/eglcontent/window_manager.h"
@@ -37,9 +36,6 @@
 #include "ui/ozone/platform/eglcontent/gpu/surface_factory.h"
 #include "ui/ozone/platform/eglcontent/gpu/window.h"
 #include "ui/ozone/platform/eglcontent/gpu/message_filter.h"
-
-#include "ui/views/widget/desktop_aura/desktop_factory_ozone.h"
-#include "ui/views/widget/desktop_aura/desktop_window_tree_host.h"
 
 #include "content/eglcontent/api/display_delegate.h"
 
@@ -92,17 +88,18 @@ namespace ui {
 	    window_manager_->CreateWindow(window_delegate, bounds));
         }
 
-        std::unique_ptr<NativeDisplayDelegate> CreateNativeDisplayDelegate() override {
-          return base::MakeUnique<display::FakeDisplayDelegate>();
+        std::unique_ptr<display::NativeDisplayDelegate>
+        CreateNativeDisplayDelegate() override {
+          return std::make_unique<display::FakeDisplayDelegate>();
         }
 
-        void InitializeUI() override {
+        void InitializeUI(const InitParams& params) override {
 	  gpu_platform_support_host_.reset(new EGLContentGPUPlatformSupportHost());
 	  window_manager_.reset(
 	    new EGLContentWindowManager(gpu_platform_support_host_.get()));
           device_manager_ = CreateDeviceManager();
           KeyboardLayoutEngineManager::SetKeyboardLayoutEngine(
-	    base::MakeUnique<StubKeyboardLayoutEngine>());
+	    std::make_unique<StubKeyboardLayoutEngine>());
 	  overlay_manager_.reset(new StubOverlayManager());
           cursor_factory_.reset(new CursorFactoryOzone());
 	  cursor_.reset(new EGLContentCursor(gfx::Size(1280, 720)));
@@ -112,7 +109,7 @@ namespace ui {
               KeyboardLayoutEngineManager::GetKeyboardLayoutEngine()));
 	}
 
-        void InitializeGPU() override {
+        void InitializeGPU(const InitParams& params) override {
 	  gpu_message_filter_.reset(
 	    new EGLContentGPUMessageFilter(display_delegate_));
 	  surface_factory_.reset(

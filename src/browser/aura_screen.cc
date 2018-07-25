@@ -101,9 +101,8 @@ namespace content {
 	  if (focused_window_)
 	    observer_manager_.Add(focused_window_);
 
-	  FOR_EACH_OBSERVER(aura::client::FocusChangeObserver,
-			    focus_observers_,
-			    OnWindowFocused(focused_window_, old_focused_window));
+	  for (aura::client::FocusChangeObserver& observer : focus_observers_)
+            observer.OnWindowFocused(focused_window_, old_focused_window);
 
 	  aura::client::FocusChangeObserver* observer =
 	    aura::client::GetFocusChangeObserver(old_focused_window);
@@ -143,11 +142,10 @@ namespace content {
     static int64_t synthesized_display_id = 2000;
     display_.set_id(synthesized_display_id++);
     display_.SetScaleAndBounds(scale_factor, gfx::Rect(size));
+    displays_vect_.push_back(display_);
   }
 
   EGLContentAuraScreen::~EGLContentAuraScreen() {
-    if (host_.get())
-      aura::client::SetWindowTreeClient(host_->window(), NULL);
   }
 
   void EGLContentAuraScreen::Initialise() {
@@ -155,7 +153,6 @@ namespace content {
     host_->InitHost();
     host_->window()->SetLayoutManager(new FillLayout(host_->window()));
     host_->window()->AddObserver(this);
-    aura::client::SetWindowTreeClient(host_->window(), this);
 
     focus_client_.reset(new FocusClient());
     aura::client::SetFocusClient(host_->window(), focus_client_.get());
@@ -167,24 +164,16 @@ namespace content {
     return host_.get();
   }
 
-  aura::Window* EGLContentAuraScreen::GetDefaultParent(aura::Window* context,
-						       aura::Window* window,
-						       const gfx::Rect& bounds) {
-    if (host_.get())
-      return host_->window();
-
-    return NULL;
-  }
-
   display::Display EGLContentAuraScreen::GetPrimaryDisplay() const {
     return display_;
   }
 
   void EGLContentAuraScreen::OnWindowBoundsChanged(aura::Window* window,
-						   const gfx::Rect& old_bounds,
-						   const gfx::Rect& new_bounds) {
+                                                   const gfx::Rect& old_bounds,
+                                                   const gfx::Rect& new_bounds,
+                                                   ui::PropertyChangeReason reason) {
     display_.SetSize(gfx::ScaleToFlooredSize(
-		       new_bounds.size(), display_.device_scale_factor()));
+                       new_bounds.size(), display_.device_scale_factor()));
   }
 
   void EGLContentAuraScreen::OnWindowDestroying(aura::Window* window) {
@@ -203,15 +192,15 @@ namespace content {
   gfx::NativeWindow EGLContentAuraScreen::GetWindowAtScreenPoint(const gfx::Point& point) {
     if (!host_.get() || !host_->window())
       return NULL;
-    return host_->window()->GetTopWindowContainingPoint(point);
+    return host_->window();
   }
 
   int EGLContentAuraScreen::GetNumDisplays() const {
-    return 1;
+    return displays_vect_.size();
   }
 
-  std::vector<display::Display> EGLContentAuraScreen::GetAllDisplays() const {
-    return std::vector<display::Display>(1, display_);
+  const std::vector<display::Display>& EGLContentAuraScreen::GetAllDisplays() const {
+    return displays_vect_;
   }
 
   display::Display EGLContentAuraScreen::GetDisplayNearestWindow(gfx::NativeView view) const {

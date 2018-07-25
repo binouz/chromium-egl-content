@@ -16,7 +16,7 @@
 # define UI_OZONE_PLATFORM_EGLCONTENT_WINDOW_MANAGER_H_
 
 #include "base/macros.h"
-#include "base/id_map.h"
+#include "base/containers/id_map.h"
 #include "base/synchronization/lock.h"
 
 #include "ui/gfx/geometry/rect.h"
@@ -34,11 +34,12 @@ namespace ui {
   class EGLContentPlatformWindow : public PlatformWindow,
 				   public PlatformEventDispatcher {
     public:
-      EGLContentPlatformWindow(EGLContentWindowManager* manager,
-			       PlatformWindowDelegate* delegate,
-			       const gfx::Rect& bounds);
+      EGLContentPlatformWindow();
       ~EGLContentPlatformWindow() override;
 
+      void Initialise(EGLContentWindowManager* manager,
+                      PlatformWindowDelegate* delegate,
+                      const gfx::Rect& bounds);
       void SetWidget(gfx::AcceleratedWidget widget);
 
       // PlatformWindow
@@ -58,7 +59,8 @@ namespace ui {
       void MoveCursorTo(const gfx::Point& location) override;
       void ConfineCursorToBounds(const gfx::Rect& bounds) override;
       PlatformImeController* GetPlatformImeController() override;
-
+      void PrepareForShutdown() override;
+      bool HasCapture() const override;
       // PlatformEventDispatcher
       bool CanDispatchEvent(const PlatformEvent& event) override;
       uint32_t DispatchEvent(const PlatformEvent& event) override;
@@ -87,7 +89,7 @@ namespace ui {
     private:
 
       EGLContentGPUPlatformSupportHost* gpu_platform_support_;
-      IDMap<EGLContentPlatformWindow> windows_;
+      base::IDMap<EGLContentPlatformWindow*> windows_;
 
       DISALLOW_COPY_AND_ASSIGN(EGLContentWindowManager);
   };

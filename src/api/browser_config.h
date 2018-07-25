@@ -20,7 +20,17 @@
 namespace EGLContent {
 
   struct BrowserConfig {
-    BrowserConfig() {}
+    BrowserConfig()
+      : cache_path(""),
+        download_directory(""),
+        download_name(""),
+        locale(""),
+        product_name(""),
+        user_agent(""),
+        accept_language(""),
+        screen_width(0),
+        screen_height(0),
+        scale_factor(1) {}
     ~BrowserConfig() {}
 
     std::string cache_path;

@@ -39,7 +39,8 @@ namespace content {
       // Gives the embedder a chance to register the content decryption
       // modules it supports.
       void AddContentDecryptionModules(
-	std::vector<content::CdmInfo>* cdms) override;
+	std::vector<content::CdmInfo>* cdms,
+        std::vector<media::CdmHostFilePath>* cdm_host_file_paths) override;
 
       // Returns a string describing the embedder product name and version,
       // of the form "productname/version", with no other slashes.

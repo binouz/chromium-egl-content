@@ -19,11 +19,6 @@
 #include "application.h"
 
 int main(int argc, const char **argv) {
-  std::unique_ptr<DemoApp> app;
-
-  // Create our own application delegate
-  app.reset(new DemoApp());
-
-  // Now that the library is ready, let's start
-  return EGLContent::Run(app.get(), argc, argv);
+  DemoApp app;
+  return EGLContent::Run(&app, argc, argv);
 }

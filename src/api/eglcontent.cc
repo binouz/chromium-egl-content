@@ -17,10 +17,13 @@
 
 #include "content/public/app/content_main.h"
 #include "content/public/app/content_main_runner.h"
+#include "content/app/content_service_manager_main_delegate.h"
 
 #include "content/public/browser/browser_thread.h"
 
 #include "content/public/common/content_switches.h"
+
+#include "services/service_manager/embedder/main.h"
 
 #include "ui/ozone/platform/eglcontent/eglcontent_interface.h"
 
@@ -39,39 +42,69 @@
 
 namespace EGLContent {
 
+  class EGLContentServiceManagerMainDelegate :
+      public content::ContentServiceManagerMainDelegate {
+
+    public:
+
+      EGLContentServiceManagerMainDelegate(
+
+        Application *app, const content::ContentMainParams& params)
+        : content::ContentServiceManagerMainDelegate(params),
+          application_(app) {}
+
+      ~EGLContentServiceManagerMainDelegate() override = default;
+
+      int Initialize(const InitializeParams& params) override {
+        base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
+        std::string process_type =
+          command_line->GetSwitchValueASCII(switches::kProcessType);
+        int result = content::ContentServiceManagerMainDelegate::Initialize(params);
+
+        if (result >= 0) {
+          LOG(WARNING)
+            << "content::ContentServiceManagerMainDelegate::Initialize failed : "
+            << result;
+          return result;
+        }
+
+        if (process_type == switches::kGpuProcess ||
+            command_line->HasSwitch(switches::kSingleProcess) ||
+            command_line->HasSwitch(switches::kInProcessGPU))
+          ui::EGLContentInterface::SetDisplayDelegate(
+            application_->CreateDisplayDelegate());
+
+        return result;
+      }
+
+    private:
+      Application *application_;
+  };
+
   int __attribute__((visibility("default"))) Run(
     Application *app, int argc, const char **argv) {
-    int exit_code;
+    EGLContent::BrowserConfig config;
 
-    base::CommandLine command_line(base::CommandLine::NO_PROGRAM);
-    command_line.InitFromArgv(argc, argv);
+    app->GetBrowserConfig(config);
 
-    std::string process_type =
-      command_line.GetSwitchValueASCII(switches::kProcessType);
+    LOG(INFO) << "cache_path=" << config.cache_path;
+    LOG(INFO) << "accept_language=" << config.accept_language;
+    LOG(INFO) << "user_agent=" << config.user_agent;
 
-    content::EGLContentMainDelegate* delegate = new content::EGLContentMainDelegate(
-      app->CreateMainDelegate(), app->CreateBrowserDelegate(), app->GetBrowserConfig());
+    content::EGLContentMainDelegate content_delegate(
+      app->CreateMainDelegate(), app->CreateBrowserDelegate(), config);
+    content::ContentMainParams content_params(&content_delegate);
 
-    content::ContentMainRunner* runner = content::ContentMainRunner::Create();
-    content::ContentMainParams params(delegate);
+    content_params.argc = argc;
+    content_params.argv = argv;
 
-    params.argc = argc;
-    params.argv = argv;
+    EGLContentServiceManagerMainDelegate service_delegate(app, content_params);
+    service_manager::MainParams service_params(&service_delegate);
 
-    exit_code = runner->Initialize(params);
-    if (exit_code >= 0) {
-      LOG(WARNING) << "ContentMainRunner initialization failed : " << exit_code;
-      return exit_code;
-    }
+    service_params.argc = argc;
+    service_params.argv = argv;
 
-    if (process_type == switches::kGpuProcess ||
-	command_line.HasSwitch(switches::kSingleProcess) ||
-	command_line.HasSwitch(switches::kInProcessGPU))
-      ui::EGLContentInterface::SetDisplayDelegate(app->CreateDisplayDelegate());
-
-    exit_code = runner->Run();
-
-    return exit_code;
+    return service_manager::Main(service_params);
   }
 
 }

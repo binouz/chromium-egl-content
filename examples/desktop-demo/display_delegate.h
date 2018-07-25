@@ -36,8 +36,8 @@ class DemoDisplayDelegate: public EGLContent::DisplayDelegate {
 
     void GetSize(int* width, int* height) override;
 
-    char* EGLLibraryName() override;
-    char* GLESLibraryName() override;
+    const char* EGLLibraryName() override;
+    const char* GLESLibraryName() override;
 
   private:
 

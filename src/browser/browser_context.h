@@ -103,6 +103,14 @@ namespace content {
 	const base::FilePath& partition_path,
 	bool in_memory) override;
 
+      // Returns the BackgroundFetchDelegate associated with that context if any,
+      // nullptr otherwise
+      BackgroundFetchDelegate* GetBackgroundFetchDelegate() override;
+
+      // Returns the BrowsingDataRemoverDelegate for this context. This will be
+      // called once per context. It's valid to return nullptr.
+      BrowsingDataRemoverDelegate* GetBrowsingDataRemoverDelegate() override;
+
     private:
 
       base::FilePath cache_path_;

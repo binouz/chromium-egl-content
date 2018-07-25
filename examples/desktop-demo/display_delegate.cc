@@ -16,10 +16,17 @@
 
 #include <iostream>
 
+#ifdef USE_NVIDIA
+static std::string kLibEGLName = "libEGL_nvidia.so.0";
+static std::string kLibGLESName = "libGLESv2_nvidia.so.367.57";
+#else
+static std::string kLibEGLName =  "libEGL.so.1";
+static std::string kLibGLESName = "libGLESv2.so.2";
+#endif
+
+
 DemoDisplayDelegate::DemoDisplayDelegate(int width, int height)
   : width_(width), height_(height) {
-  EGLint egl_major, egl_minor;
-  /* FIXME : ASSERT display_ != NULL */
 }
 
 DemoDisplayDelegate::~DemoDisplayDelegate() {
@@ -34,13 +41,8 @@ void DemoDisplayDelegate::ReleaseNativeDisplay() {
 }
 
 EGLNativeWindowType DemoDisplayDelegate::CreateNativeWindow() {
-  int num_visuals, screen;
-  unsigned long mask;
+  int screen;
   Window root;
-  XSetWindowAttributes attr;
-  XVisualInfo *visInfo, visTemplate;
-  XSizeHints sizehints;
-  EGLint num_configs, visual_id;
 
   screen = DefaultScreen(x_display_);
   root = RootWindow(x_display_, screen);
@@ -55,6 +57,7 @@ void DemoDisplayDelegate::ReleaseNativeWindow() {
 }
 
 bool DemoDisplayDelegate::Resize(int size, int height, float scale_factor) {
+  return true;
 }
 
 void DemoDisplayDelegate::GetSize(int* width, int* height) {
@@ -62,18 +65,10 @@ void DemoDisplayDelegate::GetSize(int* width, int* height) {
   *height = height_;
 }
 
-char *DemoDisplayDelegate::EGLLibraryName() {
-#ifdef USE_NVIDIA
-  return "libEGL_nvidia.so.0";
-#else
-  return "libEGL.so.1";
-#endif
+const char *DemoDisplayDelegate::EGLLibraryName() {
+  return kLibEGLName.c_str();
 }
 
-char *DemoDisplayDelegate::GLESLibraryName() {
-#ifdef USE_NVIDIA
-  return "libGLESv2_nvidia.so.367.57";
-#else
-  return "libGLESv2.so.2";
-#endif
+const char *DemoDisplayDelegate::GLESLibraryName() {
+  return kLibGLESName.c_str();
 }

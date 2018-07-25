@@ -28,11 +28,9 @@ class DemoApp : public EGLContent::Application {
     EGLContent::MainDelegate *CreateMainDelegate() override;
     EGLContent::BrowserDelegate *CreateBrowserDelegate() override;
 
-    EGLContent::BrowserConfig& GetBrowserConfig() override;
+    void GetBrowserConfig(EGLContent::BrowserConfig& config) override;
 
   private:
-
-    EGLContent::BrowserConfig config_;
 
 };
 

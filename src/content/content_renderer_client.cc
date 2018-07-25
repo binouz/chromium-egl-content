@@ -16,7 +16,6 @@
 #include "content/public/renderer/render_view.h"
 
 #include "content/eglcontent/api/main_delegate.h"
-#include "content/eglcontent/renderer/browser_host.h"
 #include "content/eglcontent/content/content_renderer_client.h"
 
 namespace content {
@@ -38,7 +37,7 @@ namespace content {
   }
 
   void EGLContentRendererClient::CreateBrowser(RenderView* render_view, RenderFrame* render_frame) {
-    if (!render_view || !render_frame || browser_host_.get())
+    if (!render_view || !render_frame)
       return;
   }
 

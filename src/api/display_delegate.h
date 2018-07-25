@@ -33,8 +33,8 @@ namespace EGLContent {
 
       virtual void GetSize(int* width, int* height) = 0;
 
-      virtual char* EGLLibraryName() = 0;
-      virtual char* GLESLibraryName() = 0;
+      virtual const char* EGLLibraryName() = 0;
+      virtual const char* GLESLibraryName() = 0;
   };
 
 }

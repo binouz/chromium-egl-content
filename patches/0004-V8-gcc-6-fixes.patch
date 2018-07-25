@@ -1,0 +1,19 @@
+--- a/v8/src/heap/mark-compact.cc	2018-07-20 17:08:28.697989805 -0400
++++ b/v8/src/heap/mark-compact.cc	2018-07-20 17:06:10.913492058 -0400
+@@ -2793,6 +2793,8 @@
+   MarkingState* marking_state_;
+ };
+ 
++#pragma GCC diagnostic push
++#pragma GCC diagnostic warning "-Wattributes"
+ template <typename MarkingState>
+ class RememberedSetUpdatingItem : public UpdatingItem {
+  public:
+@@ -2931,6 +2933,7 @@
+   MemoryChunk* chunk_;
+   RememberedSetUpdatingMode updating_mode_;
+ };
++#pragma GCC diagnostic pop
+ 
+ UpdatingItem* MarkCompactCollector::CreateToSpaceUpdatingItem(
+     MemoryChunk* chunk, Address start, Address end) {

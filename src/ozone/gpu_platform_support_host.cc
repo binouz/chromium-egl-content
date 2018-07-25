@@ -22,7 +22,7 @@ namespace ui {
 
   EGLContentGPUPlatformSupportHost::EGLContentGPUPlatformSupportHost()
     : host_id_(-1),
-      channel_established_(false) {
+      service_launched_(false) {
   }
 
   EGLContentGPUPlatformSupportHost::~EGLContentGPUPlatformSupportHost() {
@@ -30,6 +30,7 @@ namespace ui {
 
   void EGLContentGPUPlatformSupportHost::OnGpuProcessLaunched(
     int host_id,
+    scoped_refptr<base::SingleThreadTaskRunner> ui_runner,
     scoped_refptr<base::SingleThreadTaskRunner> send_runner,
     const base::Callback<void(IPC::Message*)>& send_callback) {
     host_id_ = host_id;
@@ -37,27 +38,28 @@ namespace ui {
     send_callback_ = send_callback;
   }
 
-  void EGLContentGPUPlatformSupportHost::OnChannelEstablished() {
-    channel_established_ = true;
-
+  void EGLContentGPUPlatformSupportHost::OnGpuServiceLaunched(
+    scoped_refptr<base::SingleThreadTaskRunner> host_runner,
+    scoped_refptr<base::SingleThreadTaskRunner> io_runner,
+    GpuHostBindInterfaceCallback binder) {
     if (pending_window_creations_.size() > 0) {
       for (std::vector<int32_t>::iterator it = pending_window_creations_.begin();
-	   it != pending_window_creations_.end(); ++it)
-	CreateWindow(*it);
+           it != pending_window_creations_.end(); ++it)
+        CreateWindow(*it);
     }
+
+    service_launched_ = true;
   }
 
   void EGLContentGPUPlatformSupportHost::OnChannelDestroyed(int host_id) {
     if (host_id_ == host_id) {
       host_id_ = -1;
-      channel_established_ = false;
       send_runner_ = nullptr;
       send_callback_.Reset();
     }
   }
 
-  bool EGLContentGPUPlatformSupportHost::OnMessageReceived(const IPC::Message& message) {
-    return false;
+  void EGLContentGPUPlatformSupportHost::OnMessageReceived(const IPC::Message& message) {
     // bool handled = true;
 
     // IPC_BEGIN_MESSAGE_MAP(EGLContentGPUPlatformSupportHost, message)
@@ -69,10 +71,11 @@ namespace ui {
   }
 
   void EGLContentGPUPlatformSupportHost::CreateWindow(int32_t id) {
-    if (!channel_established_) {
+    if (!service_launched_) {
       pending_window_creations_.push_back(id);
       return;
     }
+
     if (send_runner_->BelongsToCurrentThread()) {
       CreateWindowOnSenderThread(id);
     } else {

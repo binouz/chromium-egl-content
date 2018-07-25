@@ -24,16 +24,21 @@
 
 namespace ui {
 
-  EGLContentPlatformWindow::EGLContentPlatformWindow(EGLContentWindowManager* manager,
-						     PlatformWindowDelegate* delegate,
-						     const gfx::Rect& bounds)
-    : manager_(manager),
-      delegate_(delegate),
-      bounds_(bounds) {
+  EGLContentPlatformWindow::EGLContentPlatformWindow()
+    : manager_(NULL),
+      delegate_(NULL) {
   }
 
   EGLContentPlatformWindow::~EGLContentPlatformWindow() {
     manager_->RemoveWindow(widget_);
+  }
+
+  void EGLContentPlatformWindow::Initialise(EGLContentWindowManager* manager,
+                                            PlatformWindowDelegate* delegate,
+                                            const gfx::Rect& bounds) {
+    manager_ = manager;
+    delegate_ = delegate;
+    bounds_ = bounds;
   }
 
   void EGLContentPlatformWindow::SetWidget(gfx::AcceleratedWidget widget) {
@@ -91,6 +96,13 @@ namespace ui {
     return NULL;
   }
 
+  void EGLContentPlatformWindow::PrepareForShutdown() {
+  }
+
+  bool EGLContentPlatformWindow::HasCapture() const {
+    return false;
+  }
+
   bool EGLContentPlatformWindow::CanDispatchEvent(const PlatformEvent& event) {
     return true;
   }
@@ -120,10 +132,10 @@ namespace ui {
 
   EGLContentPlatformWindow* EGLContentWindowManager::CreateWindow(
     PlatformWindowDelegate* window_delegate, const gfx::Rect& bounds) {
-    EGLContentPlatformWindow* window =
-      new EGLContentPlatformWindow(this, window_delegate, bounds);
+    EGLContentPlatformWindow* window = new EGLContentPlatformWindow();
     gfx::AcceleratedWidget widget = windows_.Add(window);
 
+    window->Initialise(this, window_delegate, bounds);
     window->SetWidget(widget);
     gpu_platform_support_->CreateWindow(widget);
     window_delegate->OnAcceleratedWidgetAvailable(widget, 1.f);

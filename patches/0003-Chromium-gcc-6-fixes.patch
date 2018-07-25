@@ -1,0 +1,584 @@
+diff --git a/base/files/memory_mapped_file.cc b/base/files/memory_mapped_file.cc
+index ccd9e2366..0d142262c 100644
+--- a/base/files/memory_mapped_file.cc
++++ b/base/files/memory_mapped_file.cc
+@@ -95,8 +95,9 @@ bool MemoryMappedFile::Initialize(File file,
+   if (IsValid())
+     return false;
+ 
+-  if (region != Region::kWholeFile)
++  if (region != Region::kWholeFile) {
+     DCHECK_GE(region.offset, 0);
++  }
+ 
+   file_ = std::move(file);
+ 
+diff --git a/base/posix/unix_domain_socket.cc b/base/posix/unix_domain_socket.cc
+index 7c087a53b..c11f42623 100644
+--- a/base/posix/unix_domain_socket.cc
++++ b/base/posix/unix_domain_socket.cc
+@@ -215,8 +215,9 @@ ssize_t UnixDomainSocket::RecvMsgWithFlags(int fd,
+     // actually received a message.  Unfortunately, Linux allows sending zero
+     // length messages, which are indistinguishable from EOF, so this check
+     // has false negatives.
+-    if (r > 0 || msg.msg_controllen > 0)
++    if (r > 0 || msg.msg_controllen > 0) {
+       DCHECK_GE(pid, 0);
++    }
+ #endif
+ 
+     *out_pid = pid;
+diff --git a/cc/layers/layer.cc b/cc/layers/layer.cc
+index f8f478a64..1ddfc97c7 100644
+--- a/cc/layers/layer.cc
++++ b/cc/layers/layer.cc
+@@ -1254,8 +1254,9 @@ void Layer::PushPropertiesTo(LayerImpl* layer) {
+   subtree_property_changed_ = false;
+   inputs_.update_rect = gfx::Rect();
+ 
+-  if (mask_layer())
++  if (mask_layer()) {
+     DCHECK_EQ(bounds().ToString(), mask_layer()->bounds().ToString());
++  }
+   layer_tree_host_->RemoveLayerShouldPushProperties(this);
+ }
+ 
+diff --git a/cc/layers/surface_layer_impl.cc b/cc/layers/surface_layer_impl.cc
+index d90e233bf..7e4909513 100644
+--- a/cc/layers/surface_layer_impl.cc
++++ b/cc/layers/surface_layer_impl.cc
+@@ -131,8 +131,8 @@ viz::SurfaceDrawQuad* SurfaceLayerImpl::CreateSurfaceDrawQuad(
+   // allocate a new SharedQuadState. Assign the new SharedQuadState to
+   // *|common_shared_quad_state| so that it may be reused by another emitted
+   // viz::SurfaceDrawQuad.
+-  viz::SharedQuadState* shared_quad_state =
+-    shared_quad_state = render_pass->CreateAndAppendSharedQuadState();
++  viz::SharedQuadState* shared_quad_state;
++  shared_quad_state = render_pass->CreateAndAppendSharedQuadState();
+ 
+   PopulateScaledSharedQuadState(shared_quad_state, device_scale_factor,
+                                 device_scale_factor, contents_opaque());
+diff --git a/cc/scheduler/compositor_timing_history.cc b/cc/scheduler/compositor_timing_history.cc
+index 20ec6a038..ee36ed0e8 100644
+--- a/cc/scheduler/compositor_timing_history.cc
++++ b/cc/scheduler/compositor_timing_history.cc
+@@ -861,8 +861,9 @@ void CompositorTimingHistory::DidActivate() {
+     activate_duration_history_.InsertSample(activate_duration);
+ 
+   // The synchronous compositor doesn't necessarily draw every new active tree.
+-  if (!using_synchronous_renderer_compositor_)
++  if (!using_synchronous_renderer_compositor_) {
+     DCHECK_EQ(base::TimeTicks(), active_tree_main_frame_time_);
++  }
+   active_tree_main_frame_time_ = pending_tree_main_frame_time_;
+ 
+   activate_start_time_ = base::TimeTicks();
+diff --git a/cc/trees/debug_rect_history.h b/cc/trees/debug_rect_history.h
+index fb6b9021a..d7fd6f9da 100644
+--- a/cc/trees/debug_rect_history.h
++++ b/cc/trees/debug_rect_history.h
+@@ -51,8 +51,9 @@ struct DebugRect {
+             const gfx::Rect& new_rect,
+             TouchAction new_touch_action)
+       : type(new_type), rect(new_rect), touch_action(new_touch_action) {
+-    if (type != TOUCH_EVENT_HANDLER_RECT_TYPE)
++    if (type != TOUCH_EVENT_HANDLER_RECT_TYPE) {
+       DCHECK_EQ(touch_action, kTouchActionNone);
++    }
+   }
+   DebugRect(DebugRectType new_type, const gfx::Rect& new_rect)
+       : DebugRect(new_type, new_rect, kTouchActionNone) {}
+diff --git a/components/autofill/core/common/autofill_regexes.cc b/components/autofill/core/common/autofill_regexes.cc
+index 3c289e343..2bea371eb 100644
+--- a/components/autofill/core/common/autofill_regexes.cc
++++ b/components/autofill/core/common/autofill_regexes.cc
+@@ -31,7 +31,7 @@ class AutofillRegexes {
+ 
+  private:
+   AutofillRegexes();
+-  ~AutofillRegexes();
++  ~AutofillRegexes() __attribute__ ((unused));
+ 
+   // Maps patterns to their corresponding regex matchers.
+   std::unordered_map<base::string16, std::unique_ptr<icu::RegexMatcher>>
+diff --git a/components/metrics/call_stack_profile_metrics_provider.cc b/components/metrics/call_stack_profile_metrics_provider.cc
+index f8b22df66..ad607a87b 100644
+--- a/components/metrics/call_stack_profile_metrics_provider.cc
++++ b/components/metrics/call_stack_profile_metrics_provider.cc
+@@ -82,7 +82,7 @@ struct ProfilesState {
+   ProfilesState(const CallStackProfileParams& params,
+                 StackSamplingProfiler::CallStackProfiles profiles);
+   ProfilesState(ProfilesState&&);
+-  ProfilesState& operator=(ProfilesState&&);
++  ProfilesState& operator=(ProfilesState&&) __attribute__ ((unused));
+ 
+   // The metrics-related parameters provided to
+   // CallStackProfileMetricsProvider::GetProfilerCallback().
+diff --git a/components/variations/variations_associated_data.cc b/components/variations/variations_associated_data.cc
+index 0dffe8ff6..fd5f0ae96 100644
+--- a/components/variations/variations_associated_data.cc
++++ b/components/variations/variations_associated_data.cc
+@@ -43,8 +43,9 @@ class GroupMapAccessor {
+     // IDs are set.
+     if (key == GOOGLE_WEB_PROPERTIES || key == GOOGLE_WEB_PROPERTIES_TRIGGER ||
+         key == GOOGLE_WEB_PROPERTIES_SIGNED_IN) {
+-      if (key != GOOGLE_WEB_PROPERTIES)
++      if (key != GOOGLE_WEB_PROPERTIES) {
+         DCHECK_EQ(EMPTY_ID, GetID(GOOGLE_WEB_PROPERTIES, group_identifier));
++      }
+       if (key != GOOGLE_WEB_PROPERTIES_TRIGGER) {
+         DCHECK_EQ(EMPTY_ID,
+                   GetID(GOOGLE_WEB_PROPERTIES_TRIGGER, group_identifier));
+diff --git a/content/browser/download/download_item_utils.cc b/content/browser/download/download_item_utils.cc
+index d81bdd7df..30bc74110 100644
+--- a/content/browser/download/download_item_utils.cc
++++ b/content/browser/download/download_item_utils.cc
+@@ -24,7 +24,7 @@ class DownloadItemData : public base::SupportsUserData::Data,
+                      BrowserContext* browser_context,
+                      WebContents* web_contents);
+   static DownloadItemData* Get(const download::DownloadItem* download_item);
+-  static void Detach(download::DownloadItem* download_item);
++  static void Detach(download::DownloadItem* download_item) __attribute__ ((unused));
+ 
+   BrowserContext* browser_context() const { return browser_context_; }
+ 
+diff --git a/device/fido/fido_constants.h b/device/fido/fido_constants.h
+index 3ec3d1dd5..56c9b7922 100644
+--- a/device/fido/fido_constants.h
++++ b/device/fido/fido_constants.h
+@@ -290,7 +290,7 @@ COMPONENT_EXPORT(DEVICE_FIDO) extern const char kNoneAttestationValue[];
+ COMPONENT_EXPORT(DEVICE_FIDO)
+ extern const char kPublicKey[];
+ 
+-constexpr const char* to_string(CredentialType type) {
++inline const char* to_string(CredentialType type) {
+   switch (type) {
+     case CredentialType::kPublicKey:
+       return kPublicKey;
+diff --git a/mojo/public/cpp/bindings/lib/sync_call_restrictions.cc b/mojo/public/cpp/bindings/lib/sync_call_restrictions.cc
+index b01e04a8d..d2b408b9e 100644
+--- a/mojo/public/cpp/bindings/lib/sync_call_restrictions.cc
++++ b/mojo/public/cpp/bindings/lib/sync_call_restrictions.cc
+@@ -32,7 +32,7 @@ class SyncCallSettings {
+ 
+  private:
+   SyncCallSettings();
+-  ~SyncCallSettings();
++  ~SyncCallSettings() __attribute__ ((unused));
+ 
+   bool system_defined_value_ = true;
+   size_t scoped_allow_count_ = 0;
+diff --git a/net/dns/host_resolver_impl.cc b/net/dns/host_resolver_impl.cc
+index 3a279aaef..0b1f40eaa 100644
+--- a/net/dns/host_resolver_impl.cc
++++ b/net/dns/host_resolver_impl.cc
+@@ -544,8 +544,9 @@ class PriorityTracker {
+     highest_priority_ = static_cast<RequestPriority>(i);
+ 
+     // In absence of requests, default to MINIMUM_PRIORITY.
+-    if (total_count_ == 0)
++    if (total_count_ == 0) {
+       DCHECK_EQ(MINIMUM_PRIORITY, highest_priority_);
++    }
+   }
+ 
+  private:
+diff --git a/net/http/http_cache_transaction.cc b/net/http/http_cache_transaction.cc
+index 10eafcf1e..6ac94b298 100644
+--- a/net/http/http_cache_transaction.cc
++++ b/net/http/http_cache_transaction.cc
+@@ -2989,8 +2989,9 @@ int HttpCache::Transaction::WriteResponseInfoToEntry(bool truncated) {
+     return OK;
+   }
+ 
+-  if (truncated)
++  if (truncated) {
+     DCHECK_EQ(200, response_.headers->response_code());
++  }
+ 
+   // When writing headers, we normally only write the non-transient headers.
+   bool skip_transient_headers = true;
+diff --git a/net/http/http_stream_factory_impl_job.cc b/net/http/http_stream_factory_impl_job.cc
+index 28e6bb4dd..d1c3e4299 100644
+--- a/net/http/http_stream_factory_impl_job.cc
++++ b/net/http/http_stream_factory_impl_job.cc
+@@ -227,8 +227,9 @@ HttpStreamFactoryImpl::Job::Job(Delegate* delegate,
+     quic_version_ = session->params().quic_supported_versions[0];
+   }
+ 
+-  if (using_quic_)
++  if (using_quic_) {
+     DCHECK_NE(quic_version_, QUIC_VERSION_UNSUPPORTED);
++  }
+ 
+   DCHECK(session);
+   if (alternative_protocol != kProtoUnknown) {
+diff --git a/net/quic/core/crypto/quic_tls_adapter.cc b/net/quic/core/crypto/quic_tls_adapter.cc
+index eb4c6cd6b..97861e815 100644
+--- a/net/quic/core/crypto/quic_tls_adapter.cc
++++ b/net/quic/core/crypto/quic_tls_adapter.cc
+@@ -28,8 +28,9 @@ const BIO_METHOD QuicTlsAdapter::kBIOMethod = {
+ QuicTlsAdapter* QuicTlsAdapter::GetAdapter(BIO* bio) {
+   DCHECK_EQ(&kBIOMethod, bio->method);
+   QuicTlsAdapter* adapter = reinterpret_cast<QuicTlsAdapter*>(bio->ptr);
+-  if (adapter)
++  if (adapter) {
+     DCHECK_EQ(bio, adapter->bio());
++  }
+   return adapter;
+ }
+ 
+diff --git a/net/socket/client_socket_pool_base.cc b/net/socket/client_socket_pool_base.cc
+index 1067aae82..7f1ac9808 100644
+--- a/net/socket/client_socket_pool_base.cc
++++ b/net/socket/client_socket_pool_base.cc
+@@ -159,8 +159,9 @@ ClientSocketPoolBaseHelper::Request::Request(
+       flags_(flags),
+       net_log_(net_log),
+       socket_tag_(socket_tag) {
+-  if (respect_limits_ == ClientSocketPool::RespectLimits::DISABLED)
++  if (respect_limits_ == ClientSocketPool::RespectLimits::DISABLED) {
+     DCHECK_EQ(priority_, MAXIMUM_PRIORITY);
++  }
+ }
+ 
+ ClientSocketPoolBaseHelper::Request::~Request() {
+diff --git a/net/socket/socket_bio_adapter.cc b/net/socket/socket_bio_adapter.cc
+index edbd637a9..86c82889c 100644
+--- a/net/socket/socket_bio_adapter.cc
++++ b/net/socket/socket_bio_adapter.cc
+@@ -348,8 +348,9 @@ void SocketBIOAdapter::CallOnReadReady() {
+ SocketBIOAdapter* SocketBIOAdapter::GetAdapter(BIO* bio) {
+   DCHECK_EQ(&kBIOMethod, bio->method);
+   SocketBIOAdapter* adapter = reinterpret_cast<SocketBIOAdapter*>(bio->ptr);
+-  if (adapter)
++  if (adapter) {
+     DCHECK_EQ(bio, adapter->bio());
++  }
+   return adapter;
+ }
+ 
+diff --git a/net/spdy/chromium/spdy_session.cc b/net/spdy/chromium/spdy_session.cc
+index 7a89b554a..ab7e7cd62 100644
+--- a/net/spdy/chromium/spdy_session.cc
++++ b/net/spdy/chromium/spdy_session.cc
+@@ -3308,8 +3308,9 @@ void SpdySession::ResumeSendStalledStreams() {
+     }
+ 
+     // The size should decrease unless we got send-stalled again.
+-    if (!IsSendStalled())
++    if (!IsSendStalled()) {
+       DCHECK_LT(GetTotalSize(stream_send_unstall_queue_), old_size);
++    }
+   }
+   while (!streams_to_requeue.empty()) {
+     SpdyStream* stream = streams_to_requeue.front();
+diff --git a/net/spdy/chromium/spdy_write_queue.cc b/net/spdy/chromium/spdy_write_queue.cc
+index be0cf51b7..e90ec52f9 100644
+--- a/net/spdy/chromium/spdy_write_queue.cc
++++ b/net/spdy/chromium/spdy_write_queue.cc
+@@ -63,8 +63,9 @@ void SpdyWriteQueue::Enqueue(
+   CHECK(!removing_writes_);
+   CHECK_GE(priority, MINIMUM_PRIORITY);
+   CHECK_LE(priority, MAXIMUM_PRIORITY);
+-  if (stream.get())
++  if (stream.get()) {
+     DCHECK_EQ(stream->priority(), priority);
++  }
+   queue_[priority].push_back(
+       {frame_type, std::move(frame_producer), stream,
+        MutableNetworkTrafficAnnotationTag(traffic_annotation)});
+diff --git a/sql/connection.cc b/sql/connection.cc
+index 4fd3d41f4..7138b41bf 100644
+--- a/sql/connection.cc
++++ b/sql/connection.cc
+@@ -109,8 +109,9 @@ int BackupDatabase(sqlite3* src, sqlite3* dst, const char* db_name) {
+   // If successful, exactly one page should have been backed up.  If
+   // this breaks, check this function to make sure assumptions aren't
+   // being broken.
+-  if (rc == SQLITE_DONE)
++  if (rc == SQLITE_DONE) {
+     DCHECK_EQ(pages, 1);
++  }
+ 
+   return rc;
+ }
+diff --git a/third_party/blink/renderer/core/frame/local_frame_view.cc b/third_party/blink/renderer/core/frame/local_frame_view.cc
+index d9787de30..5c57ce904 100644
+--- a/third_party/blink/renderer/core/frame/local_frame_view.cc
++++ b/third_party/blink/renderer/core/frame/local_frame_view.cc
+@@ -834,8 +834,7 @@ void LocalFrameView::RecalcOverflowAfterStyleChange() {
+ 
+   // Changing overflow should notify scrolling coordinator to ensures that it
+   // updates non-fast scroll rects even if there is no layout.
+-  if (ScrollingCoordinator* scrolling_coordinator =
+-          this->GetScrollingCoordinator()) {
++  if (this->GetScrollingCoordinator()) {
+     GetScrollingContext()->SetScrollGestureRegionIsDirty(true);
+   }
+ 
+@@ -4090,8 +4089,7 @@ void LocalFrameView::AddScrollableArea(ScrollableArea* scrollable_area) {
+     scrollable_areas_ = new ScrollableAreaSet;
+   scrollable_areas_->insert(scrollable_area);
+ 
+-  if (ScrollingCoordinator* scrolling_coordinator =
+-          this->GetScrollingCoordinator()) {
++  if (this->GetScrollingCoordinator()) {
+     ScrollableAreasDidChange();
+   }
+ }
+@@ -4101,8 +4099,7 @@ void LocalFrameView::RemoveScrollableArea(ScrollableArea* scrollable_area) {
+     return;
+   scrollable_areas_->erase(scrollable_area);
+ 
+-  if (ScrollingCoordinator* scrolling_coordinator =
+-          this->GetScrollingCoordinator()) {
++  if (this->GetScrollingCoordinator()) {
+     ScrollableAreasDidChange();
+   }
+ }
+@@ -5290,8 +5287,7 @@ void LocalFrameView::SetParentVisible(bool visible) {
+ void LocalFrameView::Show() {
+   if (!IsSelfVisible()) {
+     SetSelfVisible(true);
+-    if (ScrollingCoordinator* scrolling_coordinator =
+-            this->GetScrollingCoordinator()) {
++    if (this->GetScrollingCoordinator()) {
+       GetScrollingContext()->SetScrollGestureRegionIsDirty(true);
+     }
+     SetNeedsCompositingUpdate(kCompositingUpdateRebuildTree);
+@@ -5319,8 +5315,7 @@ void LocalFrameView::Hide() {
+           });
+     }
+     SetSelfVisible(false);
+-    if (ScrollingCoordinator* scrolling_coordinator =
+-            this->GetScrollingCoordinator()) {
++    if (this->GetScrollingCoordinator()) {
+       GetScrollingContext()->SetScrollGestureRegionIsDirty(true);
+     }
+     SetNeedsCompositingUpdate(kCompositingUpdateRebuildTree);
+diff --git a/third_party/blink/renderer/core/page/focus_controller.cc b/third_party/blink/renderer/core/page/focus_controller.cc
+index 1b066e8f6..dd507165c 100644
+--- a/third_party/blink/renderer/core/page/focus_controller.cc
++++ b/third_party/blink/renderer/core/page/focus_controller.cc
+@@ -202,9 +202,9 @@ class ScopedFocusNavigation {
+   static ScopedFocusNavigation OwnedByIFrame(const HTMLFrameOwnerElement&,
+                                              FocusController::OwnerMap&);
+   static HTMLSlotElement* FindFallbackScopeOwnerSlot(const Element&);
+-  static bool IsSlotFallbackScoped(const Element&);
++  static bool IsSlotFallbackScoped(const Element&) __attribute__ ((unused));
+   static bool IsSlotFallbackScopedForThisSlot(const HTMLSlotElement&,
+-                                              const Element&);
++                                              const Element&) __attribute__ ((unused));
+ 
+  private:
+   ScopedFocusNavigation(ContainerNode& scoping_root_node,
+diff --git a/third_party/blink/renderer/core/paint/find_paint_offset_and_visual_rect_needing_update.h b/third_party/blink/renderer/core/paint/find_paint_offset_and_visual_rect_needing_update.h
+index b75179c75..fa2127026 100644
+--- a/third_party/blink/renderer/core/paint/find_paint_offset_and_visual_rect_needing_update.h
++++ b/third_party/blink/renderer/core/paint/find_paint_offset_and_visual_rect_needing_update.h
+@@ -42,8 +42,8 @@ class FindPaintOffsetNeedingUpdateScope {
+   ~FindPaintOffsetNeedingUpdateScope() {
+     if (is_actually_needed_)
+       return;
+-    LayoutPoint paint_offset = fragment_data_.PaintOffset();
+-    DCHECK_OBJECT_PROPERTY_EQ(object_, &old_paint_offset_, &paint_offset);
++    // LayoutPoint paint_offset = fragment_data_.PaintOffset();
++    // DCHECK_OBJECT_PROPERTY_EQ(object_, &old_paint_offset_, &paint_offset);
+     auto* paint_properties = fragment_data_.PaintProperties();
+     const auto* paint_offset_translation =
+         paint_properties ? paint_properties->PaintOffsetTranslation() : nullptr;
+diff --git a/third_party/blink/renderer/core/paint/find_properties_needing_update.h b/third_party/blink/renderer/core/paint/find_properties_needing_update.h
+index 4e80006ec..267007a83 100644
+--- a/third_party/blink/renderer/core/paint/find_properties_needing_update.h
++++ b/third_party/blink/renderer/core/paint/find_properties_needing_update.h
+@@ -144,8 +144,8 @@ class FindObjectPropertiesNeedingUpdateScope {
+     // Paint offset and paintOffsetTranslation should not change under
+     // FindObjectPropertiesNeedingUpdateScope no matter if we needed paint
+     // property update.
+-    LayoutPoint paint_offset = fragment_data_.PaintOffset();
+-    DCHECK_OBJECT_PROPERTY_EQ(object_, &original_paint_offset_, &paint_offset);
++    // LayoutPoint paint_offset = fragment_data_.PaintOffset();
++    // DCHECK_OBJECT_PROPERTY_EQ(object_, &original_paint_offset_, &paint_offset);
+     const auto* object_properties = fragment_data_.PaintProperties();
+     if (original_properties_ && object_properties) {
+       DCHECK_OBJECT_PROPERTY_EQ(object_,
+diff --git a/third_party/blink/renderer/core/paint/paint_property_tree_builder.cc b/third_party/blink/renderer/core/paint/paint_property_tree_builder.cc
+index 684268823..bcd0b87bd 100644
+--- a/third_party/blink/renderer/core/paint/paint_property_tree_builder.cc
++++ b/third_party/blink/renderer/core/paint/paint_property_tree_builder.cc
+@@ -2452,17 +2452,17 @@ bool ObjectPaintPropertyTreeBuilder::ObjectTypeMightNeedPaintProperties()
+ }
+ 
+ void ObjectPaintPropertyTreeBuilder::UpdatePaintingLayer() {
+-  bool changed_painting_layer = false;
++  // bool changed_painting_layer = false;
+   if (object_.HasLayer() &&
+       ToLayoutBoxModelObject(object_).HasSelfPaintingLayer()) {
+     context_.painting_layer = ToLayoutBoxModelObject(object_).Layer();
+-    changed_painting_layer = true;
++    // changed_painting_layer = true;
+   } else if (object_.IsColumnSpanAll() ||
+              object_.IsFloatingWithNonContainingBlockParent()) {
+     // See LayoutObject::paintingLayer() for the special-cases of floating under
+     // inline and multicolumn.
+     context_.painting_layer = object_.PaintingLayer();
+-    changed_painting_layer = true;
++    // changed_painting_layer = true;
+   }
+   DCHECK(context_.painting_layer == object_.PaintingLayer());
+ }
+diff --git a/third_party/blink/renderer/modules/accessibility/ax_menu_list_popup.cc b/third_party/blink/renderer/modules/accessibility/ax_menu_list_popup.cc
+index e9194238c..e4fe47a85 100644
+--- a/third_party/blink/renderer/modules/accessibility/ax_menu_list_popup.cc
++++ b/third_party/blink/renderer/modules/accessibility/ax_menu_list_popup.cc
+@@ -149,10 +149,11 @@ void AXMenuListPopup::DidUpdateActiveOption(int option_index,
+ void AXMenuListPopup::DidHide() {
+   AXObjectCacheImpl& cache = AXObjectCache();
+   cache.PostNotification(this, AXObjectCacheImpl::kAXHide);
+-  if (ActiveDescendant())
++  if (ActiveDescendant()) {
+     cache.PostNotification(this, AXObjectCacheImpl::kAXChildrenChanged);
+     cache.PostNotification(ActiveDescendant(),
+                            AXObjectCacheImpl::kAXMenuListItemUnselected);
++  }
+ }
+ 
+ void AXMenuListPopup::DidShow() {
+diff --git a/third_party/blink/renderer/platform/graphics/highcontrast/highcontrast_classifier.cc b/third_party/blink/renderer/platform/graphics/highcontrast/highcontrast_classifier.cc
+index c9093a9b8..bb63ec4fb 100644
+--- a/third_party/blink/renderer/platform/graphics/highcontrast/highcontrast_classifier.cc
++++ b/third_party/blink/renderer/platform/graphics/highcontrast/highcontrast_classifier.cc
+@@ -1127,7 +1127,7 @@ void Inference(
+     ,
+     FixedAllocations* __restrict fixed) {
+   const int32_t input0_shape[] = {1, 4};
+-  int32_t logits_MatMul_merged_with_dnn_logits_BiasAdd0_shape[2];
++  // int32_t logits_MatMul_merged_with_dnn_logits_BiasAdd0_shape[2];
+ 
+   // dnn/hiddenlayer_0/MatMul_merged_with_dnn/hiddenlayer_0/BiasAdd
+   FullyConnected<float>(input0_shape, input0,
+@@ -1150,8 +1150,8 @@ void Inference(
+       dnn_logits_weights_part_0.values, dnn_logits_biases_part_0_shape,
+       dnn_logits_biases_part_0.values,
+       logits_MatMul_merged_with_dnn_logits_BiasAdd0);
+-  logits_MatMul_merged_with_dnn_logits_BiasAdd0_shape[0] = 1;
+-  logits_MatMul_merged_with_dnn_logits_BiasAdd0_shape[1] = 1;
++  // logits_MatMul_merged_with_dnn_logits_BiasAdd0_shape[0] = 1;
++  // logits_MatMul_merged_with_dnn_logits_BiasAdd0_shape[1] = 1;
+ }
+ 
+ }  // namespace highcontrast_tfnative_model
+diff --git a/third_party/blink/renderer/platform/wtf/text/text_codec.h b/third_party/blink/renderer/platform/wtf/text/text_codec.h
+index 5bc0c2793..daabf7adf 100644
+--- a/third_party/blink/renderer/platform/wtf/text/text_codec.h
++++ b/third_party/blink/renderer/platform/wtf/text/text_codec.h
+@@ -68,9 +68,9 @@ enum FlushBehavior {
+   kDataEOF
+ };
+ 
+-static_assert(!kDoNotFlush, "DoNotFlush should be falsy");
+-static_assert(kFetchEOF, "FetchEOF should be truthy");
+-static_assert(kDataEOF, "DataEOF should be truthy");
++static_assert(kDoNotFlush == 0, "DoNotFlush should be falsy");
++static_assert(kFetchEOF != 0, "FetchEOF should be truthy");
++static_assert(kDataEOF != 0, "DataEOF should be truthy");
+ 
+ class WTF_EXPORT TextCodec {
+   USING_FAST_MALLOC(TextCodec);
+diff --git a/ui/events/x/keyboard_hook_posix.cc b/ui/events/x/keyboard_hook_posix.cc
+index 17c59bdcd..4b44baf66 100644
+--- a/ui/events/x/keyboard_hook_posix.cc
++++ b/ui/events/x/keyboard_hook_posix.cc
+@@ -17,7 +17,7 @@ namespace {
+ class KeyboardHookPosix : public KeyboardHookBase {
+  public:
+   KeyboardHookPosix(base::Optional<base::flat_set<int>> native_key_codes,
+-                    KeyEventCallback callback);
++                    KeyEventCallback callback) __attribute__ ((unused));
+   ~KeyboardHookPosix() override;
+ 
+  private:
+diff --git a/ui/gfx/break_list.h b/ui/gfx/break_list.h
+index cb3de2b76..de202627d 100644
+--- a/ui/gfx/break_list.h
++++ b/ui/gfx/break_list.h
+@@ -166,8 +166,9 @@ void BreakList<T>::CheckBreaks() {
+     DCHECK_LT(breaks_[i].first, breaks_[i + 1].first) << "Break out of order.";
+     DCHECK_NE(breaks_[i].second, breaks_[i + 1].second) << "Redundant break.";
+   }
+-  if (max_ > 0)
++  if (max_ > 0) {
+     DCHECK_LT(breaks_.back().first, max_) << "Break beyond max position.";
++  }
+ }
+ #endif
+ 
+diff --git a/ui/gfx/ipc/buffer_types/gfx_param_traits.cc b/ui/gfx/ipc/buffer_types/gfx_param_traits.cc
+index 483342692..99f36c102 100644
+--- a/ui/gfx/ipc/buffer_types/gfx_param_traits.cc
++++ b/ui/gfx/ipc/buffer_types/gfx_param_traits.cc
+@@ -30,7 +30,7 @@ bool ParamTraits<gfx::BufferUsageAndFormat>::Read(
+ void ParamTraits<gfx::BufferUsageAndFormat>::Log(
+     const gfx::BufferUsageAndFormat& p,
+     std::string* l) {
+-  l->append(base::StringPrintf("(%d, %d)", p.usage, p.format));
++  l->append(base::StringPrintf("(%d, %d)", (int)p.usage, (int)p.format));
+ }
+ 
+ }  // namespace IPC
+diff --git a/ui/gfx/ipc/skia/gfx_skia_param_traits_macros.h b/ui/gfx/ipc/skia/gfx_skia_param_traits_macros.h
+index e48af3f0a..5f5b5c3e3 100644
+--- a/ui/gfx/ipc/skia/gfx_skia_param_traits_macros.h
++++ b/ui/gfx/ipc/skia/gfx_skia_param_traits_macros.h
+@@ -10,7 +10,7 @@
+ #include "ipc/ipc_message_macros.h"
+ #include "third_party/skia/include/core/SkImageInfo.h"
+ 
+-IPC_ENUM_TRAITS_VALIDATE(SkColorType, kLastEnum_SkColorType);
+-IPC_ENUM_TRAITS_VALIDATE(SkAlphaType, kLastEnum_SkAlphaType);
++IPC_ENUM_TRAITS_VALIDATE(SkColorType, kLastEnum_SkColorType != 0);
++IPC_ENUM_TRAITS_VALIDATE(SkAlphaType, kLastEnum_SkAlphaType != 0);
+ 
+ #endif  // UI_GFX_IPC_SKIA_GFX_SKIA_PARAM_TRAITS_MACROS_H_
+diff --git a/ui/gfx/paint_vector_icon.cc b/ui/gfx/paint_vector_icon.cc
+index d2968ffe3..2b3043c21 100644
+--- a/ui/gfx/paint_vector_icon.cc
++++ b/ui/gfx/paint_vector_icon.cc
+@@ -537,8 +537,9 @@ IconDescription::IconDescription(const VectorIcon& icon,
+ 
+   // If an icon has a .1x.icon version, it should only be rendered at the size
+   // specified in that definition.
+-  if (icon.rep_1x)
++  if (icon.rep_1x) {
+     DCHECK_EQ(this->dip_size, GetDefaultSizeOfVectorIcon(icon));
++  }
+ }
+ 
+ IconDescription::~IconDescription() {}
+diff --git a/ui/gfx/render_text.cc b/ui/gfx/render_text.cc
+index 39702db77..11c24a6d6 100644
+--- a/ui/gfx/render_text.cc
++++ b/ui/gfx/render_text.cc
+@@ -1244,8 +1244,9 @@ HorizontalAlignment RenderText::GetCurrentHorizontalAlignment() {
+ 
+ Vector2d RenderText::GetAlignmentOffset(size_t line_number) {
+   // TODO(ckocagil): Enable |lines_| usage on RenderTextMac.
+-  if (MultilineSupported() && multiline_)
++  if (MultilineSupported() && multiline_) {
+     DCHECK_LT(line_number, lines_.size());
++  }
+   Vector2d offset;
+   HorizontalAlignment horizontal_alignment = GetCurrentHorizontalAlignment();
+   if (horizontal_alignment != ALIGN_LEFT) {
+--- a/third_party/blink/renderer/platform/scheduler/base/task_queue_impl.h	2018-07-26 23:34:16.896452901 -0400
++++ b/third_party/blink/renderer/platform/scheduler/base/task_queue_impl.h	2018-07-26 23:35:43.273634510 -0400
+@@ -87,7 +87,7 @@
+       if (time == other.time) {
+         // Debug gcc builds can compare an element against itself.
+         DCHECK(sequence_num != other.sequence_num || this == &other);
+-        return (sequence_num - other.sequence_num) < 0;
++        return ((this == &other) || (sequence_num - other.sequence_num) < 0);
+       }
+       return time < other.time;
+     }

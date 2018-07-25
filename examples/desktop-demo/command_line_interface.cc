@@ -124,7 +124,8 @@ void CommandLineInterface::Run() {
     std::string str;
 
     std::cout << "> " << std::flush;
-    std::getline(std::cin, str);
+    if (std::getline(std::cin, str).eof())
+      break;
 
     parser.Parse(str);
 

@@ -36,7 +36,8 @@ namespace content {
   }
 
   void EGLContentClient::AddContentDecryptionModules(
-    std::vector<content::CdmInfo>* cdms) {
+    std::vector<content::CdmInfo>* cdms,
+    std::vector<media::CdmHostFilePath>* cdm_host_file_paths) {
     // TODO
   }
 
@@ -51,17 +52,17 @@ namespace content {
   base::StringPiece EGLContentClient::GetDataResource(
     int resource_id,
     ui::ScaleFactor scale_factor) const {
-    return ResourceBundle::GetSharedInstance().GetRawDataResourceForScale(
+    return ui::ResourceBundle::GetSharedInstance().GetRawDataResourceForScale(
       resource_id, scale_factor);
   }
 
   base::RefCountedMemory* EGLContentClient::GetDataResourceBytes(
     int resource_id) const {
-    return ResourceBundle::GetSharedInstance().LoadDataResourceBytes(resource_id);
+    return ui::ResourceBundle::GetSharedInstance().LoadDataResourceBytes(resource_id);
   }
 
   gfx::Image& EGLContentClient::GetNativeImageNamed(int resource_id) const {
-    return ResourceBundle::GetSharedInstance().GetNativeImageNamed(resource_id);
+    return ui::ResourceBundle::GetSharedInstance().GetNativeImageNamed(resource_id);
   }
 
 }

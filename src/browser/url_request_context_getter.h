@@ -34,11 +34,12 @@ namespace content {
 
     public:
 
-      EGLContentURLRequestContextGetter(ProtocolHandlerMap* protocol_handlers,
-					URLRequestInterceptorScopedVector request_interceptors,
-				        base::FilePath& cache_path,
-					std::string& accept_language,
-					std::string& user_agent);
+      EGLContentURLRequestContextGetter(
+        ProtocolHandlerMap* protocol_handlers,
+        URLRequestInterceptorScopedVector request_interceptors,
+        base::FilePath& cache_path,
+        std::string& accept_language,
+        std::string& user_agent);
       ~EGLContentURLRequestContextGetter();
 
       // Returns the URLRequestContextGetter's URLRequestContext. Must only be
@@ -63,9 +64,8 @@ namespace content {
       ProtocolHandlerMap protocol_handlers_;
       URLRequestInterceptorScopedVector request_interceptors_;
 
-      std::unique_ptr<net::ProxyConfigService> proxy_config_service_;
-      std::unique_ptr<net::NetworkDelegate> network_delegate_;
-      std::unique_ptr<net::URLRequestContextStorage> storage_;
+      scoped_refptr<base::SingleThreadTaskRunner> io_task_runner_;
+
       std::unique_ptr<net::URLRequestContext> url_request_context_;
 
   };

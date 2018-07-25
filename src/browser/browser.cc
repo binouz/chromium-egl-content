@@ -71,7 +71,7 @@ namespace content {
     web_contents_.reset(
       WebContents::Create(create_params));
 
-    screen_->host()->SetBounds(gfx::Rect(window_size));
+    screen_->host()->SetBoundsInPixels(gfx::Rect(window_size));
     screen_->host()->Show();
 
     web_contents_->SetDelegate(this);
@@ -153,6 +153,8 @@ namespace content {
   void EGLContentBrowser::LoadURLTask(std::string url) {
     GURL gurl(url);
     NavigationController::LoadURLParams params(gurl);
+    LOG(INFO) << "Loading url : " << url;
+    params.frame_name = std::string();
     params.transition_type = ui::PageTransitionFromInt(
       ui::PAGE_TRANSITION_TYPED | ui::PAGE_TRANSITION_FROM_ADDRESS_BAR);
     web_contents_->GetController().LoadURLWithParams(params);
@@ -168,7 +170,7 @@ namespace content {
   }
 
   void EGLContentBrowser::ReloadTask() {
-    web_contents_->GetController().Reload(false);
+    web_contents_->GetController().Reload(ReloadType::NORMAL, false);
   }
 
 }

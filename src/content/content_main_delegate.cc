@@ -52,8 +52,6 @@ namespace content {
 
   bool EGLContentMainDelegate::BasicStartupComplete(int* exit_code) {
     base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
-    std::string process_type =
-      command_line->GetSwitchValueASCII(switches::kProcessType);
 
     command_line->AppendSwitch(switches::kNoSandbox);
 
@@ -82,7 +80,7 @@ namespace content {
     if (!process_type.empty())
       return -1;
 
-    base::trace_event::TraceLog::GetInstance()->SetProcessName("Browser");
+    base::trace_event::TraceLog::GetInstance()->set_process_name("Browser");
     base::trace_event::TraceLog::GetInstance()->SetProcessSortIndex(
       kTraceEventBrowserProcessSortIndex);
 
@@ -101,7 +99,7 @@ namespace content {
   }
 
   void EGLContentMainDelegate::ProcessExiting(const std::string& process_type) {
-    ResourceBundle::CleanupSharedInstance();
+    ui::ResourceBundle::CleanupSharedInstance();
   }
 
   void EGLContentMainDelegate::ZygoteForked() {

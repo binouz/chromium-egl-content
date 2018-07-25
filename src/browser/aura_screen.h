@@ -20,14 +20,13 @@
 #include "ui/display/display.h"
 #include "ui/aura/window_observer.h"
 #include "ui/aura/window_tree_host.h"
-#include "ui/aura/client/window_tree_client.h"
 #include "ui/aura/client/focus_client.h"
+#include "ui/aura/mus/window_tree_client.h"
 
 namespace content {
 
   class EGLContentAuraScreen : public display::Screen,
-			       public aura::WindowObserver,
-			       public aura::client::WindowTreeClient {
+			       public aura::WindowObserver {
     public:
 
       EGLContentAuraScreen(gfx::Size size, float scale_factor);
@@ -37,11 +36,6 @@ namespace content {
 
       aura::WindowTreeHost* host();
 
-      // aura::client::WindowTreeClient
-      aura::Window* GetDefaultParent(aura::Window* context,
-				     aura::Window* window,
-				     const gfx::Rect& bounds) override;
-
       // display::Screen overrides
       display::Display GetPrimaryDisplay() const override;
 
@@ -50,7 +44,8 @@ namespace content {
       // aura::WindowObserver overrides
       void OnWindowBoundsChanged(aura::Window* window,
 				 const gfx::Rect& old_bounds,
-				 const gfx::Rect& new_bounds) override;
+				 const gfx::Rect& new_bounds,
+                                 ui::PropertyChangeReason reason) override;
       void OnWindowDestroying(aura::Window* window) override;
 
       // display::Screen overrides
@@ -58,7 +53,7 @@ namespace content {
       bool IsWindowUnderCursor(gfx::NativeWindow window) override;
       gfx::NativeWindow GetWindowAtScreenPoint(const gfx::Point& point) override;
       int GetNumDisplays() const override;
-      std::vector<display::Display> GetAllDisplays() const override;
+      const std::vector<display::Display>& GetAllDisplays() const override;
       display::Display GetDisplayNearestWindow(gfx::NativeView view) const override;
       display::Display GetDisplayNearestPoint(
 	const gfx::Point& point) const override;
@@ -70,6 +65,7 @@ namespace content {
     private:
 
       display::Display display_;
+      std::vector<display::Display> displays_vect_;
 
       std::unique_ptr<aura::WindowTreeHost> host_;
       std::unique_ptr<aura::client::FocusClient> focus_client_;

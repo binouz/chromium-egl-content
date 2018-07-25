@@ -29,7 +29,7 @@ namespace EGLContent {
       virtual DisplayDelegate *CreateDisplayDelegate() = 0;
       virtual MainDelegate *CreateMainDelegate() = 0;
       virtual BrowserDelegate *CreateBrowserDelegate() = 0;
-      virtual BrowserConfig& GetBrowserConfig() = 0;
+      virtual void GetBrowserConfig(BrowserConfig& config) = 0;
   };
 
 }

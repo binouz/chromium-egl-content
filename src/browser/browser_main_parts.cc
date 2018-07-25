@@ -27,8 +27,9 @@ namespace content {
   EGLContentBrowserMainParts::~EGLContentBrowserMainParts(){
   }
 
-  void EGLContentBrowserMainParts::PreEarlyInitialization() {
+  int EGLContentBrowserMainParts::PreEarlyInitialization() {
     // ui::InitializeInputMethodForTesting();
+    return 0;
   }
 
   void EGLContentBrowserMainParts::PostEarlyInitialization() {

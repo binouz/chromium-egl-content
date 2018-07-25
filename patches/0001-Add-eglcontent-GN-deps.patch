@@ -1,0 +1,12 @@
+diff --git a/BUILD.gn b/BUILD.gn
+index acd17275a..1160f0f6d 100644
+--- a/BUILD.gn
++++ b/BUILD.gn
+@@ -71,6 +71,7 @@ group("gn_all") {
+     "//tools/ipc_fuzzer:ipc_fuzzer_all",
+     "//ui/base:ui_base_unittests",
+     "//url:url_unittests",
++    "//content/eglcontent",
+   ]
+ 
+   if (!is_android && !is_chromecast) {

@@ -46,8 +46,6 @@ namespace content {
       void CreateBrowser(RenderView* render_view, RenderFrame* render_frame);
 
       EGLContent::MainDelegate* delegate_;
-
-      std::unique_ptr<EGLContentBrowserHost> browser_host_;
   };
 
 }

@@ -30,7 +30,7 @@ namespace content {
 				 EGLContent::BrowserDelegate* delegate);
       ~EGLContentBrowserMainParts();
 
-      void PreEarlyInitialization() override;
+      int PreEarlyInitialization() override;
 
       void PostEarlyInitialization() override;
 
