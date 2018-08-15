@@ -53,10 +53,16 @@ use_ozone=true
 use_pulseaudio=false
 use_alsa=false
 target_os="linux"
-# Stuff to look into
-use_sysroot=false
-enable_extensions=true
 toolkit_views=false
 ozone_auto_platforms=false
 use_gold=true
 use_custom_libcxx=false
+enable_mojo_media=true
+# TODO : add  cdm to media services
+mojo_media_services=["renderer"]
+mojo_media_host="gpu"
+
+# Stuff to look into
+use_sysroot=false
+enable_extensions=true
+

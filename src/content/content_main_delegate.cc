@@ -30,6 +30,7 @@
 #include "content/eglcontent/content/content_client.h"
 #include "content/eglcontent/content/content_browser_client.h"
 #include "content/eglcontent/content/content_renderer_client.h"
+#include "content/eglcontent/content/content_gpu_client.h"
 #include "content/eglcontent/content/content_utility_client.h"
 
 #include "content/eglcontent/browser/browser.h"
@@ -117,6 +118,12 @@ namespace content {
     renderer_client_.reset(new EGLContentRendererClient(main_delegate_));
 
     return renderer_client_.get();
+  }
+
+  ContentGpuClient* EGLContentMainDelegate::CreateContentGpuClient() {
+    gpu_client_.reset(new EGLContentGPUClient(main_delegate_->CreateMediaDelegate()));
+
+    return gpu_client_.get();
   }
 
 }

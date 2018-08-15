@@ -36,6 +36,8 @@ shared_library("egl_content_lib") {
     "content/content_browser_client.h",
     "content/content_renderer_client.cc",
     "content/content_renderer_client.h",
+    "content/content_gpu_client.cc",
+    "content/content_gpu_client.h",
     "browser/browser.cc",
     "browser/browser.h",
     "browser/browser_main_parts.cc",
@@ -48,9 +50,18 @@ shared_library("egl_content_lib") {
     "browser/url_request_context_getter.h",
     "browser/aura_screen.cc",
     "browser/aura_screen.h",
+    "media/mojo_media_client.cc",
+    "media/mojo_media_client.h",
+    "media/audio_decoder.cc",
+    "media/audio_decoder.h",
+    "media/video_decoder.cc",
+    "media/video_decoder.h",
+    "media/surface_manager.cc",
+    "media/surface_manager.h",
     "api/eglcontent.cc",
     "api/eglcontent.h",
-    "api/browser_config.h"
+    "api/browser_config.h",
+    "api/media_delegate.h"
   ]
 
   configs += [

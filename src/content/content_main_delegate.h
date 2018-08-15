@@ -74,6 +74,8 @@ namespace content {
       // override this.
       ContentBrowserClient* CreateContentBrowserClient() override;
       ContentRendererClient* CreateContentRendererClient() override;
+      ContentGpuClient* CreateContentGpuClient() override;
+
     private:
 
       EGLContent::BrowserConfig browser_config_;
@@ -81,6 +83,7 @@ namespace content {
       std::unique_ptr<ContentClient> content_client_;
       std::unique_ptr<ContentBrowserClient> browser_client_;
       std::unique_ptr<ContentRendererClient> renderer_client_;
+      std::unique_ptr<ContentGpuClient> gpu_client_;
       std::unique_ptr<EGLContentBrowser> browser_;
 
       EGLContent::MainDelegate* main_delegate_;

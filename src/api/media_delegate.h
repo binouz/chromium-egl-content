@@ -12,24 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef EGLCONTENT_API_MAIN_DELEGATE_H_
-# define EGLCONTENT_API_MAIN_DELEGATE_H_
+#ifndef EGLCONTENT_API_MEDIA_DELEGATE_H_
+# define EGLCONTENT_API_MEDIA_DELEGATE_H_
 
 namespace EGLContent {
 
-  class MediaDelegate;
-
-  class MainDelegate {
+  class MediaDelegate {
 
     public:
 
-      virtual void OnStartupComplete() = 0;
-      virtual void BeforeSandboxing() = 0;
-      virtual void AfterSandboxing() = 0;
-      virtual MediaDelegate CreateMediaDelegate();
-
+      virtual void InitialiseMediaPlatform() = 0;
+      virtual AudioDecoderDelegate* CreateAudioDecoderDelegate() = 0;
+      virtual VideoDecoderDelegate* CreateVideoDecoderDelegate() = 0;
+      virtual AudioSinkDelegate* CreateAudioSinkDelegate() = 0;
+      virtual VideoSinkDelegate* CreateVideoSinkDelegate() = 0;
   };
 
 }
 
-#endif /* !EGLCONTENT_API_MAIN_DELEGATE_H_ */
+#endif /* !EGLCONTENT_API_MEDIA_DELEGATE_H_ */
