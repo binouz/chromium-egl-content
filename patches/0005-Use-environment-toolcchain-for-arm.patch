@@ -1,5 +1,5 @@
---- a/chromium/chromium-67.0.3396.99/build/toolchain/linux/BUILD.gn	2018-08-15 04:28:18.203347633 +0000
-+++ b/chromium/chromium-67.0.3396.99/build/toolchain/linux/BUILD.gn	2018-08-15 04:29:31.905302235 +0000
+--- a/build/toolchain/linux/BUILD.gn	2018-08-15 04:28:18.203347633 +0000
++++ b/build/toolchain/linux/BUILD.gn	2018-08-15 04:29:31.905302235 +0000
 @@ -42,13 +42,13 @@
  gcc_toolchain("arm") {
    toolprefix = "arm-linux-gnueabihf-"
