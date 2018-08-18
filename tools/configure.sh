@@ -38,8 +38,8 @@ echo "** Copying build args"
 cp ${topdir}/src/build/args.gn ${outdir}
 
 echo "** Adding GN_EXTRA_ARGS to build args"
-if [ -n ${GN_EXTRA_ARGS} ]; then
-    echo ${GN_EXTRA_ARGS} >> ${outdir}/args.gn
+if [ -n "${GN_EXTRA_ARGS}" ]; then
+    echo "${GN_EXTRA_ARGS}" >> ${outdir}/args.gn
 fi
 
 echo "** Creating build files"
