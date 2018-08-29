@@ -34,7 +34,7 @@ configure:
 		$(BUILD_OUTPUT_DIRECTORY)
 
 build:
-	@ninja -j 7 -C out egl_content_lib
+	@ninja -j 6 -C out egl_content_lib
 
 export:
 	@./tools/export_headers.sh $(TOPDIR) $(CHROMIUM_CHECKOUT) $(VERSION) \

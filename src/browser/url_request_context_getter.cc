@@ -42,23 +42,6 @@
 
 namespace content {
 
-  namespace {
-
-    class IgnoresCTPolicyEnforcer : public net::CTPolicyEnforcer {
-      public:
-        IgnoresCTPolicyEnforcer() = default;
-        ~IgnoresCTPolicyEnforcer() override = default;
-
-        net::ct::CTPolicyCompliance CheckCompliance(
-          net::X509Certificate* cert,
-          const net::SCTList& verified_scts,
-          const net::NetLogWithSource& net_log) override {
-          return net::ct::CTPolicyCompliance::CT_POLICY_COMPLIES_VIA_SCTS;
-        }
-    };
-
-  }
-
   EGLContentURLRequestContextGetter::EGLContentURLRequestContextGetter(
     ProtocolHandlerMap* protocol_handlers,
     URLRequestInterceptorScopedVector request_interceptors,
@@ -110,13 +93,12 @@ namespace content {
       builder.set_accept_language(accept_language_);
       builder.set_user_agent(user_agent_);
       builder.SetCertVerifier(net::CertVerifier::CreateDefault());
-      builder.set_ct_verifier(base::WrapUnique(new net::DoNothingCTVerifier));
-      builder.set_ct_policy_enforcer(
-        base::WrapUnique(new IgnoresCTPolicyEnforcer));
       builder.set_proxy_config_service(std::move(proxy_config_service));
       builder.EnableHttpCache(cache_params);
       builder.set_http_network_session_params(network_session_params);
+      builder.set_data_enabled(true);
       builder.set_file_enabled(true);
+      builder.set_enable_brotli(true);
 
       for (ProtocolHandlerMap::iterator it =
 	     protocol_handlers_.begin();
@@ -124,8 +106,10 @@ namespace content {
 	   ++it) {
         builder.SetProtocolHandler(
           it->first,
-          base::WrapUnique(it->second.release()));
+          std::move(it->second));
       }
+
+      builder.SetInterceptors(std::move(request_interceptors_));
 
       url_request_context_ = builder.Build();
     }

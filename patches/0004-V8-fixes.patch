@@ -1,0 +1,47 @@
+From 9474481adcc8043b59306b4f0e02fde156149d92 Mon Sep 17 00:00:00 2001
+From: Aubin REBILLAT <rebillat.aubin@gmail.com>
+Date: Wed, 29 Aug 2018 13:04:13 -0400
+Subject: [PATCH 1/2] v8-fixes.patch
+
+---
+ src/heap/mark-compact.cc | 3 +++
+ v8/src/code-stub-assembler.h | 2 +-
+ 2 file changed, 4 insertion(+), 1 deletion(-)
+
+diff --git a/v8/src/code-stub-assembler.h b/v8/src/code-stub-assembler.h
+index 35341b65d..ab45923a7 100644
+--- a/v8/src/code-stub-assembler.h
++++ b/v8/src/code-stub-assembler.h
+@@ -2379,7 +2379,7 @@ class V8_EXPORT_PRIVATE CodeStubAssembler : public compiler::CodeAssembler {
+ 
+   // Implements generic linear search procedure like i::LinearSearch<Array>().
+   template <typename Array>
+-  void LookupLinear(TNode<Name> unique_name, TNode<Array> array,
++  __attribute__ ((visibility("hidden"))) void LookupLinear(TNode<Name> unique_name, TNode<Array> array,
+                     TNode<Uint32T> number_of_valid_entries, Label* if_found,
+                     TVariable<IntPtrT>* var_name_index, Label* if_not_found);
+ 
+diff --git a/src/heap/mark-compact.cc b/src/heap/mark-compact.cc
+index 50be29c..35492e5 100644
+--- a/v8/src/heap/mark-compact.cc
++++ b/v8/src/heap/mark-compact.cc
+@@ -2749,6 +2749,8 @@ class ToSpaceUpdatingItem : public UpdatingItem {
+   MarkingState* marking_state_;
+ };
+ 
++#pragma GCC diagnostic push
++#pragma GCC diagnostic warning "-Wattributes"
+ template <typename MarkingState>
+ class RememberedSetUpdatingItem : public UpdatingItem {
+  public:
+@@ -2884,6 +2886,7 @@ class RememberedSetUpdatingItem : public UpdatingItem {
+   MemoryChunk* chunk_;
+   RememberedSetUpdatingMode updating_mode_;
+ };
++#pragma GCC diagnostic pop
+ 
+ UpdatingItem* MarkCompactCollector::CreateToSpaceUpdatingItem(
+     MemoryChunk* chunk, Address start, Address end) {
+-- 
+2.17.1
+

@@ -64,6 +64,7 @@ namespace ui {
       // PlatformEventDispatcher
       bool CanDispatchEvent(const PlatformEvent& event) override;
       uint32_t DispatchEvent(const PlatformEvent& event) override;
+      PlatformWindowState GetPlatformWindowState() const override;
 
     private:
 

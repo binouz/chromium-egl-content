@@ -103,6 +103,10 @@ namespace ui {
     return false;
   }
 
+  PlatformWindowState EGLContentPlatformWindow::GetPlatformWindowState() const{
+    return PLATFORM_WINDOW_STATE_FULLSCREEN;
+  }
+
   bool EGLContentPlatformWindow::CanDispatchEvent(const PlatformEvent& event) {
     return true;
   }

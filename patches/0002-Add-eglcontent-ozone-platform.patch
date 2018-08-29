@@ -1,8 +1,18 @@
+From ddf1264977c7bcd5c5ad550a47e4676fcc420076 Mon Sep 17 00:00:00 2001
+From: Aubin REBILLAT <rebillat.aubin@gmail.com>
+Date: Fri, 24 Aug 2018 11:36:19 -0400
+Subject: [PATCH 2/3] Add-eglcontent-ozone-platform
+
+---
+ ui/ozone/BUILD.gn  | 5 +++++
+ ui/ozone/ozone.gni | 6 +++++-
+ 2 files changed, 10 insertions(+), 1 deletion(-)
+
 diff --git a/ui/ozone/BUILD.gn b/ui/ozone/BUILD.gn
-index 2154dd02c..76a0abd59 100644
+index 4309ea282..fdf8839e4 100644
 --- a/ui/ozone/BUILD.gn
 +++ b/ui/ozone/BUILD.gn
-@@ -48,6 +48,11 @@ if (ozone_platform_x11) {
+@@ -54,6 +54,11 @@ if (ozone_platform_x11) {
    ozone_platform_deps += [ "platform/x11" ]
  }
  
@@ -15,12 +25,12 @@ index 2154dd02c..76a0abd59 100644
  platform_list_h_file = "$target_gen_dir/platform_list.h"
  platform_list_txt_file = "$target_gen_dir/platform_list.txt"
 diff --git a/ui/ozone/ozone.gni b/ui/ozone/ozone.gni
-index 8e8105136..7b586e2a6 100644
+index d7e4234c3..f77d83e06 100644
 --- a/ui/ozone/ozone.gni
 +++ b/ui/ozone/ozone.gni
-@@ -30,6 +30,9 @@ declare_args() {
-   # Compile the 'wayland' platform.
-   ozone_platform_wayland = false
+@@ -33,6 +33,9 @@ declare_args() {
+   # Compile the 'windows' platform.
+   ozone_platform_windows = false
  
 +  # Compile the 'eglcontent' platform.
 +  ozone_platform_eglcontent = false
@@ -28,10 +38,14 @@ index 8e8105136..7b586e2a6 100644
    if (ozone_auto_platforms) {
      # Use headless as the default platform unless modified below.
      ozone_platform = "headless"
-@@ -65,5 +68,5 @@ declare_args() {
+@@ -71,5 +74,6 @@ declare_args() {
  
  assert(use_ozone || !(ozone_platform_cast || ozone_platform_gbm ||
                            ozone_platform_headless || ozone_platform_x11 ||
--                          ozone_platform_wayland),
-+                          ozone_platform_wayland || ozone_platform_eglcontent),
+-                          ozone_platform_wayland || ozone_platform_windows),
++                          ozone_platform_wayland || ozone_platform_windows ||
++                          ozone_platform_eglcontent),
         "Must set use_ozone to select ozone platforms")
+-- 
+2.17.1
+

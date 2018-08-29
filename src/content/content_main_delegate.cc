@@ -13,18 +13,18 @@
 // limitations under the License.
 
 #include "base/path_service.h"
-#include "base/base_switches.h"
 #include "base/command_line.h"
 #include "base/trace_event/trace_log.h"
 
 #include "content/common/content_constants_internal.h"
-#include "content/public/common/content_switches.h"
 #include "content/public/browser/browser_thread.h"
 #include "content/browser/browser_main.h"
 
 #include "ui/base/resource/resource_bundle.h"
 
 #include "components/crash/content/app/breakpad_linux.h"
+
+#include "services/service_manager/sandbox/switches.h"
 
 #include "content/eglcontent/content/content_main_delegate.h"
 #include "content/eglcontent/content/content_client.h"
@@ -53,7 +53,7 @@ namespace content {
   bool EGLContentMainDelegate::BasicStartupComplete(int* exit_code) {
     base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
 
-    command_line->AppendSwitch(switches::kNoSandbox);
+    command_line->AppendSwitch(service_manager::switches::kNoSandbox);
 
     content_client_.reset(new EGLContentClient(main_delegate_, browser_config_));
     SetContentClient(content_client_.get());
@@ -63,7 +63,7 @@ namespace content {
 
   void EGLContentMainDelegate::PreSandboxStartup() {
     base::FilePath pak_file;
-    PathService::Get(base::DIR_MODULE, &pak_file);
+    base::PathService::Get(base::DIR_MODULE, &pak_file);
     pak_file = pak_file.Append(FILE_PATH_LITERAL("egl_content.pak"));
     ui::ResourceBundle::InitSharedInstanceWithPakPath(pak_file);
 

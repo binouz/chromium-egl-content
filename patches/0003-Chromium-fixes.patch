@@ -1,3 +1,278 @@
+From 23b777e45aa9cc7d9f15ff38786936fac3c778dd Mon Sep 17 00:00:00 2001
+From: Aubin REBILLAT <rebillat.aubin@gmail.com>
+Date: Wed, 29 Aug 2018 13:05:03 -0400
+Subject: [PATCH 2/2] chromium-fixes
+
+---
+ cc/input/snap_fling_controller.cc                         | 1 +
+ .../browser/background_fetch/background_fetch_context.cc  | 2 +-
+ .../browser/cache_storage/cache_storage_quota_client.cc   | 1 +
+ content/browser/web_package/signed_exchange_handler.cc    | 2 +-
+ content/renderer/input/input_event_prediction.cc          | 2 +-
+ media/capture/video/video_capture_device_descriptor.cc    | 1 +
+ net/nqe/network_quality_estimator.cc                      | 1 +
+ .../audio/public/cpp/audio_system_to_service_adapter.cc   | 1 +
+ services/network/cross_origin_read_blocking.cc            | 2 ++
+ services/network/public/cpp/cors/cors_legacy.cc           | 5 +----
+ third_party/blink/renderer/core/frame/local_frame_view.cc | 3 +--
+ .../renderer/core/paint/find_properties_needing_update.h  | 4 ++--
+ .../renderer/modules/accessibility/ax_layout_object.cc    | 1 +
+ .../blink/renderer/modules/webaudio/audio_param.cc        | 1 +
+ ui/aura/hit_test_data_provider_aura.cc                    | 8 ++++----
+ ui/gfx/ipc/buffer_types/gfx_param_traits.cc               | 2 +-
+ base/files/memory_mapped_file.cc                          | 3 ++-
+ base/posix/unix_domain_socket.cc                          | 3 ++-
+ cc/layers/layer.cc                                        | 3 ++-
+ cc/layers/surface_layer_impl.cc                           | 3 +--
+ cc/scheduler/compositor_timing_history.cc                 | 3 ++-
+ components/autofill/core/common/autofill_regexes.cc       | 2 +-
+ .../metrics/call_stack_profile_metrics_provider.cc        | 2 +-
+ components/variations/variations_associated_data.cc       | 3 ++-
+ content/browser/download/download_item_utils.cc           | 2 +-
+ net/dns/host_resolver_impl.cc                             | 3 ++-
+ net/http/http_cache_transaction.cc                        | 3 ++-
+ net/socket/client_socket_pool_base.cc                     | 3 ++-
+ net/socket/socket_bio_adapter.cc                          | 3 ++-
+ sql/connection.cc                                         | 3 ++-
+ .../blink/renderer/core/frame/local_frame_view.cc         | 12 ++++--------
+ .../blink/renderer/core/page/focus_controller.cc          | 4 ++--
+ ...ind_paint_offset_and_visual_rect_needing_update.h      | 2 --
+ .../core/paint/paint_property_tree_builder.cc             | 3 ---
+ .../modules/accessibility/ax_menu_list_popup.cc           | 3 ++-
+ .../graphics/highcontrast/highcontrast_classifier.cc      | 3 ---
+ .../platform/scheduler/base/task_queue_impl.h             | 2 +-
+ .../blink/renderer/platform/wtf/text/text_codec.h         | 6 +++---
+ ui/gfx/break_list.h                                       | 3 ++-
+ ui/gfx/ipc/skia/gfx_skia_param_traits_macros.h            | 4 ++--
+ ui/gfx/render_text.cc                                     | 3 ++-
+ 16 files changed, 21 insertions(+), 16 deletions(-)
+
+diff --git a/cc/input/snap_fling_controller.cc b/cc/input/snap_fling_controller.cc
+index 4c8e485bc..2df10b606 100644
+--- a/cc/input/snap_fling_controller.cc
++++ b/cc/input/snap_fling_controller.cc
+@@ -27,6 +27,7 @@ bool SnapFlingController::FilterEventForSnap(
+       return state_ == State::kActive || state_ == State::kFinished;
+     }
+   }
++  return false;
+ }
+ 
+ void SnapFlingController::ClearSnapFling() {
+diff --git a/content/browser/background_fetch/background_fetch_context.cc b/content/browser/background_fetch/background_fetch_context.cc
+index 0ddea2614..0c3af7dd4 100644
+--- a/content/browser/background_fetch/background_fetch_context.cc
++++ b/content/browser/background_fetch/background_fetch_context.cc
+@@ -218,7 +218,7 @@ void BackgroundFetchContext::InitializeController(
+ 
+   scheduler_->AddJobController(controller.get());
+ 
+-  job_controllers_.insert({unique_id, std::move(controller)});
++  job_controllers_[unique_id] = std::move(controller);
+   std::move(done_closure).Run();
+ }
+ 
+diff --git a/content/browser/cache_storage/cache_storage_quota_client.cc b/content/browser/cache_storage/cache_storage_quota_client.cc
+index 50086c0cd..38a4cdbe5 100644
+--- a/content/browser/cache_storage/cache_storage_quota_client.cc
++++ b/content/browser/cache_storage/cache_storage_quota_client.cc
+@@ -99,6 +99,7 @@ storage::QuotaClient::ID CacheStorageQuotaClient::GetIDFromOwner(
+     case CacheStorageOwner::kBackgroundFetch:
+       return kBackgroundFetch;
+   }
++  return kBackgroundFetch;
+ }
+ 
+ }  // namespace content
+diff --git a/content/browser/web_package/signed_exchange_handler.cc b/content/browser/web_package/signed_exchange_handler.cc
+index 52e127a28..323dcaa44 100644
+--- a/content/browser/web_package/signed_exchange_handler.cc
++++ b/content/browser/web_package/signed_exchange_handler.cc
+@@ -363,7 +363,7 @@ void SignedExchangeHandler::OnCertVerifyComplete(int result) {
+         base::StringPrintf(
+             "OCSP check failed. response status: %d, revocation status: %d",
+             cert_verify_result_.ocsp_result.response_status,
+-            cert_verify_result_.ocsp_result.revocation_status));
++            (int)cert_verify_result_.ocsp_result.revocation_status));
+     RunErrorCallback(static_cast<net::Error>(net::ERR_FAILED));
+     return;
+   }
+diff --git a/content/renderer/input/input_event_prediction.cc b/content/renderer/input/input_event_prediction.cc
+index 89636c973..b8c89ec98 100644
+--- a/content/renderer/input/input_event_prediction.cc
++++ b/content/renderer/input/input_event_prediction.cc
+@@ -119,7 +119,7 @@ void InputEventPrediction::UpdateSinglePointer(
+     if (predictor != pointer_id_predictor_map_.end()) {
+       predictor->second->Update(data);
+     } else {
+-      pointer_id_predictor_map_.insert({event.id, SetUpPredictor()});
++      pointer_id_predictor_map_[event.id] = std::move(SetUpPredictor());
+       pointer_id_predictor_map_[event.id]->Update(data);
+     }
+   }
+diff --git a/media/capture/video/video_capture_device_descriptor.cc b/media/capture/video/video_capture_device_descriptor.cc
+index 3a718ed8c..7e28c64ef 100644
+--- a/media/capture/video/video_capture_device_descriptor.cc
++++ b/media/capture/video/video_capture_device_descriptor.cc
+@@ -93,6 +93,7 @@ const char* VideoCaptureDeviceDescriptor::GetCaptureApiTypeString() const {
+     case VideoCaptureApi::UNKNOWN:
+       return "Unknown";
+   }
++  return "";
+ }
+ 
+ std::string VideoCaptureDeviceDescriptor::GetNameAndModel() const {
+diff --git a/net/nqe/network_quality_estimator.cc b/net/nqe/network_quality_estimator.cc
+index 619c3a10c..7417ea489 100644
+--- a/net/nqe/network_quality_estimator.cc
++++ b/net/nqe/network_quality_estimator.cc
+@@ -1320,6 +1320,7 @@ base::TimeDelta NetworkQualityEstimator::GetRTTEstimateInternal(
+       NOTREACHED();
+       return base::TimeDelta();
+   }
++  return base::TimeDelta();
+ }
+ 
+ int32_t NetworkQualityEstimator::GetDownlinkThroughputKbpsEstimateInternal(
+diff --git a/services/audio/public/cpp/audio_system_to_service_adapter.cc b/services/audio/public/cpp/audio_system_to_service_adapter.cc
+index 91967b506..84f83049d 100644
+--- a/services/audio/public/cpp/audio_system_to_service_adapter.cc
++++ b/services/audio/public/cpp/audio_system_to_service_adapter.cc
+@@ -68,6 +68,7 @@ const char* GetTraceEvent(Action action) {
+       return "AudioSystemToServiceAdapter::GetInputDeviceInfo";
+   }
+   NOTREACHED();
++  return "";
+ }
+ 
+ void LogUMA(Action action, base::TimeTicks start_time) {
+diff --git a/services/network/cross_origin_read_blocking.cc b/services/network/cross_origin_read_blocking.cc
+index 7ab93bd47..4c635d737 100644
+--- a/services/network/cross_origin_read_blocking.cc
++++ b/services/network/cross_origin_read_blocking.cc
+@@ -787,6 +787,7 @@ bool CrossOriginReadBlocking::ResponseAnalyzer::should_allow() const {
+     case kBlock:
+       return false;
+   }
++  return false;
+ }
+ 
+ bool CrossOriginReadBlocking::ResponseAnalyzer::should_block() const {
+@@ -798,6 +799,7 @@ bool CrossOriginReadBlocking::ResponseAnalyzer::should_block() const {
+     case kBlock:
+       return true;
+   }
++  return true;
+ }
+ 
+ void CrossOriginReadBlocking::ResponseAnalyzer::LogBytesReadForSniffing() {
+diff --git a/services/network/public/cpp/cors/cors_legacy.cc b/services/network/public/cpp/cors/cors_legacy.cc
+index 8f32ac3be..480b3a1bb 100644
+--- a/services/network/public/cpp/cors/cors_legacy.cc
++++ b/services/network/public/cpp/cors/cors_legacy.cc
+@@ -1,16 +1,13 @@
+ // Copyright 2018 The Chromium Authors. All rights reserved.
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
++#include <string>
+ 
+ #include "services/network/public/cpp/cors/cors_legacy.h"
+ 
+ #include <algorithm>
+-#include <string>
+ #include <vector>
+ 
+-#include "url/gurl.h"
+-#include "url/url_util.h"
+-
+ namespace {
+ 
+ std::vector<std::string>* secure_origins = nullptr;
+diff --git a/third_party/blink/renderer/core/frame/local_frame_view.cc b/third_party/blink/renderer/core/frame/local_frame_view.cc
+index dd359a726..e56305459 100644
+--- a/third_party/blink/renderer/core/frame/local_frame_view.cc
++++ b/third_party/blink/renderer/core/frame/local_frame_view.cc
+@@ -5313,8 +5313,7 @@ void LocalFrameView::SetParentVisible(bool visible) {
+ void LocalFrameView::Show() {
+   if (!IsSelfVisible()) {
+     SetSelfVisible(true);
+-    if (ScrollingCoordinator* scrolling_coordinator =
+-            this->GetScrollingCoordinator()) {
++    if (this->GetScrollingCoordinator()) {
+       GetScrollingContext()->SetScrollGestureRegionIsDirty(true);
+     }
+     SetNeedsCompositingUpdate(kCompositingUpdateRebuildTree);
+diff --git a/third_party/blink/renderer/core/paint/find_properties_needing_update.h b/third_party/blink/renderer/core/paint/find_properties_needing_update.h
+index 2caa88923..6a167bb21 100644
+--- a/third_party/blink/renderer/core/paint/find_properties_needing_update.h
++++ b/third_party/blink/renderer/core/paint/find_properties_needing_update.h
+@@ -81,8 +81,8 @@ class FindObjectPropertiesNeedingUpdateScope {
+     // Paint offset and paintOffsetTranslation should not change under
+     // FindObjectPropertiesNeedingUpdateScope no matter if we needed paint
+     // property update.
+-    LayoutPoint paint_offset = fragment_data_.PaintOffset();
+-    DCHECK_OBJECT_PROPERTY_EQ(object_, &original_paint_offset_, &paint_offset);
++    // LayoutPoint paint_offset = fragment_data_.PaintOffset();
++    // DCHECK_OBJECT_PROPERTY_EQ(object_, &original_paint_offset_, &paint_offset);
+     const auto* object_properties = fragment_data_.PaintProperties();
+     if (original_properties_ && object_properties) {
+       DCHECK_OBJECT_PROPERTY_EQ(object_,
+diff --git a/third_party/blink/renderer/modules/accessibility/ax_layout_object.cc b/third_party/blink/renderer/modules/accessibility/ax_layout_object.cc
+index 6e03e7a6c..709e05632 100644
+--- a/third_party/blink/renderer/modules/accessibility/ax_layout_object.cc
++++ b/third_party/blink/renderer/modules/accessibility/ax_layout_object.cc
+@@ -1140,6 +1140,7 @@ AXTextPosition AXLayoutObject::GetTextPosition() const {
+     case EVerticalAlign::kSuper:
+       return kAXTextPositionSuperscript;
+   }
++  return AXNodeObject::GetTextPosition();
+ }
+ 
+ int AXLayoutObject::TextLength() const {
+diff --git a/third_party/blink/renderer/modules/webaudio/audio_param.cc b/third_party/blink/renderer/modules/webaudio/audio_param.cc
+index 14df3dc83..9d2a29c4e 100644
+--- a/third_party/blink/renderer/modules/webaudio/audio_param.cc
++++ b/third_party/blink/renderer/modules/webaudio/audio_param.cc
+@@ -145,6 +145,7 @@ String AudioParamHandler::GetParamName() const {
+     default:
+       NOTREACHED();
+   }
++  return "";
+ }
+ 
+ float AudioParamHandler::Value() {
+diff --git a/ui/aura/hit_test_data_provider_aura.cc b/ui/aura/hit_test_data_provider_aura.cc
+index 7b5463a49..9937227c1 100644
+--- a/ui/aura/hit_test_data_provider_aura.cc
++++ b/ui/aura/hit_test_data_provider_aura.cc
+@@ -51,10 +51,10 @@ base::Optional<viz::HitTestRegionList> HitTestDataProviderAura::GetHitTestData(
+ 
+   base::Optional<viz::HitTestRegionList> hit_test_region_list(base::in_place);
+   hit_test_region_list->flags =
+-      event_targeting_policy ==
+-              ui::mojom::EventTargetingPolicy::DESCENDANTS_ONLY
+-          ? viz::HitTestRegionFlags::kHitTestIgnore
+-          : viz::HitTestRegionFlags::kHitTestMine;
++      (event_targeting_policy) ==
++              (ui::mojom::EventTargetingPolicy::DESCENDANTS_ONLY)
++          ? (uint32_t)viz::HitTestRegionFlags::kHitTestIgnore
++          : (uint32_t)viz::HitTestRegionFlags::kHitTestMine;
+   // TODO(crbug.com/805416): Use pixels instead of DIP units for bounds.
+   hit_test_region_list->bounds = window_->bounds();
+ 
+diff --git a/ui/gfx/ipc/buffer_types/gfx_param_traits.cc b/ui/gfx/ipc/buffer_types/gfx_param_traits.cc
+index 483342692..99f36c102 100644
+--- a/ui/gfx/ipc/buffer_types/gfx_param_traits.cc
++++ b/ui/gfx/ipc/buffer_types/gfx_param_traits.cc
+@@ -30,7 +30,7 @@ bool ParamTraits<gfx::BufferUsageAndFormat>::Read(
+ void ParamTraits<gfx::BufferUsageAndFormat>::Log(
+     const gfx::BufferUsageAndFormat& p,
+     std::string* l) {
+-  l->append(base::StringPrintf("(%d, %d)", p.usage, p.format));
++  l->append(base::StringPrintf("(%d, %d)", (int)p.usage, (int)p.format));
+ }
+ 
+ }  // namespace IPC
 diff --git a/base/files/memory_mapped_file.cc b/base/files/memory_mapped_file.cc
 index ccd9e2366..0d142262c 100644
 --- a/base/files/memory_mapped_file.cc
@@ -29,10 +304,10 @@ index 7c087a53b..c11f42623 100644
  
      *out_pid = pid;
 diff --git a/cc/layers/layer.cc b/cc/layers/layer.cc
-index f8f478a64..1ddfc97c7 100644
+index c5fb253d8..29a16cd87 100644
 --- a/cc/layers/layer.cc
 +++ b/cc/layers/layer.cc
-@@ -1254,8 +1254,9 @@ void Layer::PushPropertiesTo(LayerImpl* layer) {
+@@ -1246,8 +1246,9 @@ void Layer::PushPropertiesTo(LayerImpl* layer) {
    subtree_property_changed_ = false;
    inputs_.update_rect = gfx::Rect();
  
@@ -44,25 +319,24 @@ index f8f478a64..1ddfc97c7 100644
  }
  
 diff --git a/cc/layers/surface_layer_impl.cc b/cc/layers/surface_layer_impl.cc
-index d90e233bf..7e4909513 100644
+index def528151..1ff8e524c 100644
 --- a/cc/layers/surface_layer_impl.cc
 +++ b/cc/layers/surface_layer_impl.cc
-@@ -131,8 +131,8 @@ viz::SurfaceDrawQuad* SurfaceLayerImpl::CreateSurfaceDrawQuad(
+@@ -131,8 +131,7 @@ viz::SurfaceDrawQuad* SurfaceLayerImpl::CreateSurfaceDrawQuad(
    // allocate a new SharedQuadState. Assign the new SharedQuadState to
    // *|common_shared_quad_state| so that it may be reused by another emitted
    // viz::SurfaceDrawQuad.
 -  viz::SharedQuadState* shared_quad_state =
 -    shared_quad_state = render_pass->CreateAndAppendSharedQuadState();
-+  viz::SharedQuadState* shared_quad_state;
-+  shared_quad_state = render_pass->CreateAndAppendSharedQuadState();
++  viz::SharedQuadState* shared_quad_state = render_pass->CreateAndAppendSharedQuadState();
  
    PopulateScaledSharedQuadState(shared_quad_state, device_scale_factor,
                                  device_scale_factor, contents_opaque());
 diff --git a/cc/scheduler/compositor_timing_history.cc b/cc/scheduler/compositor_timing_history.cc
-index 20ec6a038..ee36ed0e8 100644
+index dd4d8f8a9..4a531ec41 100644
 --- a/cc/scheduler/compositor_timing_history.cc
 +++ b/cc/scheduler/compositor_timing_history.cc
-@@ -861,8 +861,9 @@ void CompositorTimingHistory::DidActivate() {
+@@ -841,8 +841,9 @@ void CompositorTimingHistory::DidActivate() {
      activate_duration_history_.InsertSample(activate_duration);
  
    // The synchronous compositor doesn't necessarily draw every new active tree.
@@ -73,21 +347,6 @@ index 20ec6a038..ee36ed0e8 100644
    active_tree_main_frame_time_ = pending_tree_main_frame_time_;
  
    activate_start_time_ = base::TimeTicks();
-diff --git a/cc/trees/debug_rect_history.h b/cc/trees/debug_rect_history.h
-index fb6b9021a..d7fd6f9da 100644
---- a/cc/trees/debug_rect_history.h
-+++ b/cc/trees/debug_rect_history.h
-@@ -51,8 +51,9 @@ struct DebugRect {
-             const gfx::Rect& new_rect,
-             TouchAction new_touch_action)
-       : type(new_type), rect(new_rect), touch_action(new_touch_action) {
--    if (type != TOUCH_EVENT_HANDLER_RECT_TYPE)
-+    if (type != TOUCH_EVENT_HANDLER_RECT_TYPE) {
-       DCHECK_EQ(touch_action, kTouchActionNone);
-+    }
-   }
-   DebugRect(DebugRectType new_type, const gfx::Rect& new_rect)
-       : DebugRect(new_type, new_rect, kTouchActionNone) {}
 diff --git a/components/autofill/core/common/autofill_regexes.cc b/components/autofill/core/common/autofill_regexes.cc
 index 3c289e343..2bea371eb 100644
 --- a/components/autofill/core/common/autofill_regexes.cc
@@ -102,15 +361,15 @@ index 3c289e343..2bea371eb 100644
    // Maps patterns to their corresponding regex matchers.
    std::unordered_map<base::string16, std::unique_ptr<icu::RegexMatcher>>
 diff --git a/components/metrics/call_stack_profile_metrics_provider.cc b/components/metrics/call_stack_profile_metrics_provider.cc
-index f8b22df66..ad607a87b 100644
+index bce2bbbb8..b30bfd2e0 100644
 --- a/components/metrics/call_stack_profile_metrics_provider.cc
 +++ b/components/metrics/call_stack_profile_metrics_provider.cc
-@@ -82,7 +82,7 @@ struct ProfilesState {
-   ProfilesState(const CallStackProfileParams& params,
+@@ -61,7 +61,7 @@ struct ProfilesState {
+                 base::TimeTicks start_timestamp,
                  StackSamplingProfiler::CallStackProfiles profiles);
    ProfilesState(ProfilesState&&);
 -  ProfilesState& operator=(ProfilesState&&);
-+  ProfilesState& operator=(ProfilesState&&) __attribute__ ((unused));
++  ProfilesState& operator=(ProfilesState&&)  __attribute__ ((unused));
  
    // The metrics-related parameters provided to
    // CallStackProfileMetricsProvider::GetProfilerCallback().
@@ -142,37 +401,11 @@ index d81bdd7df..30bc74110 100644
  
    BrowserContext* browser_context() const { return browser_context_; }
  
-diff --git a/device/fido/fido_constants.h b/device/fido/fido_constants.h
-index 3ec3d1dd5..56c9b7922 100644
---- a/device/fido/fido_constants.h
-+++ b/device/fido/fido_constants.h
-@@ -290,7 +290,7 @@ COMPONENT_EXPORT(DEVICE_FIDO) extern const char kNoneAttestationValue[];
- COMPONENT_EXPORT(DEVICE_FIDO)
- extern const char kPublicKey[];
- 
--constexpr const char* to_string(CredentialType type) {
-+inline const char* to_string(CredentialType type) {
-   switch (type) {
-     case CredentialType::kPublicKey:
-       return kPublicKey;
-diff --git a/mojo/public/cpp/bindings/lib/sync_call_restrictions.cc b/mojo/public/cpp/bindings/lib/sync_call_restrictions.cc
-index b01e04a8d..d2b408b9e 100644
---- a/mojo/public/cpp/bindings/lib/sync_call_restrictions.cc
-+++ b/mojo/public/cpp/bindings/lib/sync_call_restrictions.cc
-@@ -32,7 +32,7 @@ class SyncCallSettings {
- 
-  private:
-   SyncCallSettings();
--  ~SyncCallSettings();
-+  ~SyncCallSettings() __attribute__ ((unused));
- 
-   bool system_defined_value_ = true;
-   size_t scoped_allow_count_ = 0;
 diff --git a/net/dns/host_resolver_impl.cc b/net/dns/host_resolver_impl.cc
-index 3a279aaef..0b1f40eaa 100644
+index bdf16b8ab..a9b433747 100644
 --- a/net/dns/host_resolver_impl.cc
 +++ b/net/dns/host_resolver_impl.cc
-@@ -544,8 +544,9 @@ class PriorityTracker {
+@@ -538,8 +538,9 @@ class PriorityTracker {
      highest_priority_ = static_cast<RequestPriority>(i);
  
      // In absence of requests, default to MINIMUM_PRIORITY.
@@ -184,7 +417,7 @@ index 3a279aaef..0b1f40eaa 100644
  
   private:
 diff --git a/net/http/http_cache_transaction.cc b/net/http/http_cache_transaction.cc
-index 10eafcf1e..6ac94b298 100644
+index 1a9fbedb2..0090ccb36 100644
 --- a/net/http/http_cache_transaction.cc
 +++ b/net/http/http_cache_transaction.cc
 @@ -2989,8 +2989,9 @@ int HttpCache::Transaction::WriteResponseInfoToEntry(bool truncated) {
@@ -198,41 +431,11 @@ index 10eafcf1e..6ac94b298 100644
  
    // When writing headers, we normally only write the non-transient headers.
    bool skip_transient_headers = true;
-diff --git a/net/http/http_stream_factory_impl_job.cc b/net/http/http_stream_factory_impl_job.cc
-index 28e6bb4dd..d1c3e4299 100644
---- a/net/http/http_stream_factory_impl_job.cc
-+++ b/net/http/http_stream_factory_impl_job.cc
-@@ -227,8 +227,9 @@ HttpStreamFactoryImpl::Job::Job(Delegate* delegate,
-     quic_version_ = session->params().quic_supported_versions[0];
-   }
- 
--  if (using_quic_)
-+  if (using_quic_) {
-     DCHECK_NE(quic_version_, QUIC_VERSION_UNSUPPORTED);
-+  }
- 
-   DCHECK(session);
-   if (alternative_protocol != kProtoUnknown) {
-diff --git a/net/quic/core/crypto/quic_tls_adapter.cc b/net/quic/core/crypto/quic_tls_adapter.cc
-index eb4c6cd6b..97861e815 100644
---- a/net/quic/core/crypto/quic_tls_adapter.cc
-+++ b/net/quic/core/crypto/quic_tls_adapter.cc
-@@ -28,8 +28,9 @@ const BIO_METHOD QuicTlsAdapter::kBIOMethod = {
- QuicTlsAdapter* QuicTlsAdapter::GetAdapter(BIO* bio) {
-   DCHECK_EQ(&kBIOMethod, bio->method);
-   QuicTlsAdapter* adapter = reinterpret_cast<QuicTlsAdapter*>(bio->ptr);
--  if (adapter)
-+  if (adapter) {
-     DCHECK_EQ(bio, adapter->bio());
-+  }
-   return adapter;
- }
- 
 diff --git a/net/socket/client_socket_pool_base.cc b/net/socket/client_socket_pool_base.cc
-index 1067aae82..7f1ac9808 100644
+index 8e7fd3822..ec37f6614 100644
 --- a/net/socket/client_socket_pool_base.cc
 +++ b/net/socket/client_socket_pool_base.cc
-@@ -159,8 +159,9 @@ ClientSocketPoolBaseHelper::Request::Request(
+@@ -146,8 +146,9 @@ ClientSocketPoolBaseHelper::Request::Request(
        flags_(flags),
        net_log_(net_log),
        socket_tag_(socket_tag) {
@@ -258,38 +461,8 @@ index edbd637a9..86c82889c 100644
    return adapter;
  }
  
-diff --git a/net/spdy/chromium/spdy_session.cc b/net/spdy/chromium/spdy_session.cc
-index 7a89b554a..ab7e7cd62 100644
---- a/net/spdy/chromium/spdy_session.cc
-+++ b/net/spdy/chromium/spdy_session.cc
-@@ -3308,8 +3308,9 @@ void SpdySession::ResumeSendStalledStreams() {
-     }
- 
-     // The size should decrease unless we got send-stalled again.
--    if (!IsSendStalled())
-+    if (!IsSendStalled()) {
-       DCHECK_LT(GetTotalSize(stream_send_unstall_queue_), old_size);
-+    }
-   }
-   while (!streams_to_requeue.empty()) {
-     SpdyStream* stream = streams_to_requeue.front();
-diff --git a/net/spdy/chromium/spdy_write_queue.cc b/net/spdy/chromium/spdy_write_queue.cc
-index be0cf51b7..e90ec52f9 100644
---- a/net/spdy/chromium/spdy_write_queue.cc
-+++ b/net/spdy/chromium/spdy_write_queue.cc
-@@ -63,8 +63,9 @@ void SpdyWriteQueue::Enqueue(
-   CHECK(!removing_writes_);
-   CHECK_GE(priority, MINIMUM_PRIORITY);
-   CHECK_LE(priority, MAXIMUM_PRIORITY);
--  if (stream.get())
-+  if (stream.get()) {
-     DCHECK_EQ(stream->priority(), priority);
-+  }
-   queue_[priority].push_back(
-       {frame_type, std::move(frame_producer), stream,
-        MutableNetworkTrafficAnnotationTag(traffic_annotation)});
 diff --git a/sql/connection.cc b/sql/connection.cc
-index 4fd3d41f4..7138b41bf 100644
+index 877ffb502..e1b0782bb 100644
 --- a/sql/connection.cc
 +++ b/sql/connection.cc
 @@ -109,8 +109,9 @@ int BackupDatabase(sqlite3* src, sqlite3* dst, const char* db_name) {
@@ -304,10 +477,10 @@ index 4fd3d41f4..7138b41bf 100644
    return rc;
  }
 diff --git a/third_party/blink/renderer/core/frame/local_frame_view.cc b/third_party/blink/renderer/core/frame/local_frame_view.cc
-index d9787de30..5c57ce904 100644
+index 351ac2782..dd359a726 100644
 --- a/third_party/blink/renderer/core/frame/local_frame_view.cc
 +++ b/third_party/blink/renderer/core/frame/local_frame_view.cc
-@@ -834,8 +834,7 @@ void LocalFrameView::RecalcOverflowAfterStyleChange() {
+@@ -830,8 +830,7 @@ void LocalFrameView::RecalcOverflowAfterStyleChange() {
  
    // Changing overflow should notify scrolling coordinator to ensures that it
    // updates non-fast scroll rects even if there is no layout.
@@ -317,7 +490,7 @@ index d9787de30..5c57ce904 100644
      GetScrollingContext()->SetScrollGestureRegionIsDirty(true);
    }
  
-@@ -4090,8 +4089,7 @@ void LocalFrameView::AddScrollableArea(ScrollableArea* scrollable_area) {
+@@ -4122,8 +4121,7 @@ void LocalFrameView::AddScrollableArea(ScrollableArea* scrollable_area) {
      scrollable_areas_ = new ScrollableAreaSet;
    scrollable_areas_->insert(scrollable_area);
  
@@ -327,7 +500,7 @@ index d9787de30..5c57ce904 100644
      ScrollableAreasDidChange();
    }
  }
-@@ -4101,8 +4099,7 @@ void LocalFrameView::RemoveScrollableArea(ScrollableArea* scrollable_area) {
+@@ -4133,8 +4131,7 @@ void LocalFrameView::RemoveScrollableArea(ScrollableArea* scrollable_area) {
      return;
    scrollable_areas_->erase(scrollable_area);
  
@@ -337,17 +510,7 @@ index d9787de30..5c57ce904 100644
      ScrollableAreasDidChange();
    }
  }
-@@ -5290,8 +5287,7 @@ void LocalFrameView::SetParentVisible(bool visible) {
- void LocalFrameView::Show() {
-   if (!IsSelfVisible()) {
-     SetSelfVisible(true);
--    if (ScrollingCoordinator* scrolling_coordinator =
--            this->GetScrollingCoordinator()) {
-+    if (this->GetScrollingCoordinator()) {
-       GetScrollingContext()->SetScrollGestureRegionIsDirty(true);
-     }
-     SetNeedsCompositingUpdate(kCompositingUpdateRebuildTree);
-@@ -5319,8 +5315,7 @@ void LocalFrameView::Hide() {
+@@ -5340,8 +5337,7 @@ void LocalFrameView::Hide() {
            });
      }
      SetSelfVisible(false);
@@ -358,7 +521,7 @@ index d9787de30..5c57ce904 100644
      }
      SetNeedsCompositingUpdate(kCompositingUpdateRebuildTree);
 diff --git a/third_party/blink/renderer/core/page/focus_controller.cc b/third_party/blink/renderer/core/page/focus_controller.cc
-index 1b066e8f6..dd507165c 100644
+index da3d74c21..37fa8efe2 100644
 --- a/third_party/blink/renderer/core/page/focus_controller.cc
 +++ b/third_party/blink/renderer/core/page/focus_controller.cc
 @@ -202,9 +202,9 @@ class ScopedFocusNavigation {
@@ -374,62 +537,42 @@ index 1b066e8f6..dd507165c 100644
   private:
    ScopedFocusNavigation(ContainerNode& scoping_root_node,
 diff --git a/third_party/blink/renderer/core/paint/find_paint_offset_and_visual_rect_needing_update.h b/third_party/blink/renderer/core/paint/find_paint_offset_and_visual_rect_needing_update.h
-index b75179c75..fa2127026 100644
+index b75179c75..6b135c210 100644
 --- a/third_party/blink/renderer/core/paint/find_paint_offset_and_visual_rect_needing_update.h
 +++ b/third_party/blink/renderer/core/paint/find_paint_offset_and_visual_rect_needing_update.h
-@@ -42,8 +42,8 @@ class FindPaintOffsetNeedingUpdateScope {
+@@ -42,8 +42,6 @@ class FindPaintOffsetNeedingUpdateScope {
    ~FindPaintOffsetNeedingUpdateScope() {
      if (is_actually_needed_)
        return;
 -    LayoutPoint paint_offset = fragment_data_.PaintOffset();
 -    DCHECK_OBJECT_PROPERTY_EQ(object_, &old_paint_offset_, &paint_offset);
-+    // LayoutPoint paint_offset = fragment_data_.PaintOffset();
-+    // DCHECK_OBJECT_PROPERTY_EQ(object_, &old_paint_offset_, &paint_offset);
      auto* paint_properties = fragment_data_.PaintProperties();
      const auto* paint_offset_translation =
          paint_properties ? paint_properties->PaintOffsetTranslation() : nullptr;
-diff --git a/third_party/blink/renderer/core/paint/find_properties_needing_update.h b/third_party/blink/renderer/core/paint/find_properties_needing_update.h
-index 4e80006ec..267007a83 100644
---- a/third_party/blink/renderer/core/paint/find_properties_needing_update.h
-+++ b/third_party/blink/renderer/core/paint/find_properties_needing_update.h
-@@ -144,8 +144,8 @@ class FindObjectPropertiesNeedingUpdateScope {
-     // Paint offset and paintOffsetTranslation should not change under
-     // FindObjectPropertiesNeedingUpdateScope no matter if we needed paint
-     // property update.
--    LayoutPoint paint_offset = fragment_data_.PaintOffset();
--    DCHECK_OBJECT_PROPERTY_EQ(object_, &original_paint_offset_, &paint_offset);
-+    // LayoutPoint paint_offset = fragment_data_.PaintOffset();
-+    // DCHECK_OBJECT_PROPERTY_EQ(object_, &original_paint_offset_, &paint_offset);
-     const auto* object_properties = fragment_data_.PaintProperties();
-     if (original_properties_ && object_properties) {
-       DCHECK_OBJECT_PROPERTY_EQ(object_,
 diff --git a/third_party/blink/renderer/core/paint/paint_property_tree_builder.cc b/third_party/blink/renderer/core/paint/paint_property_tree_builder.cc
-index 684268823..bcd0b87bd 100644
+index bdf35a040..f60cf7bc9 100644
 --- a/third_party/blink/renderer/core/paint/paint_property_tree_builder.cc
 +++ b/third_party/blink/renderer/core/paint/paint_property_tree_builder.cc
-@@ -2452,17 +2452,17 @@ bool ObjectPaintPropertyTreeBuilder::ObjectTypeMightNeedPaintProperties()
+@@ -2392,17 +2392,14 @@ bool PaintPropertyTreeBuilder::ObjectTypeMightNeedPaintProperties() const {
  }
  
- void ObjectPaintPropertyTreeBuilder::UpdatePaintingLayer() {
+ void PaintPropertyTreeBuilder::UpdatePaintingLayer() {
 -  bool changed_painting_layer = false;
-+  // bool changed_painting_layer = false;
    if (object_.HasLayer() &&
        ToLayoutBoxModelObject(object_).HasSelfPaintingLayer()) {
      context_.painting_layer = ToLayoutBoxModelObject(object_).Layer();
 -    changed_painting_layer = true;
-+    // changed_painting_layer = true;
    } else if (object_.IsColumnSpanAll() ||
               object_.IsFloatingWithNonContainingBlockParent()) {
      // See LayoutObject::paintingLayer() for the special-cases of floating under
      // inline and multicolumn.
      context_.painting_layer = object_.PaintingLayer();
 -    changed_painting_layer = true;
-+    // changed_painting_layer = true;
    }
    DCHECK(context_.painting_layer == object_.PaintingLayer());
  }
 diff --git a/third_party/blink/renderer/modules/accessibility/ax_menu_list_popup.cc b/third_party/blink/renderer/modules/accessibility/ax_menu_list_popup.cc
-index e9194238c..e4fe47a85 100644
+index 1b6f2ba75..1835156ca 100644
 --- a/third_party/blink/renderer/modules/accessibility/ax_menu_list_popup.cc
 +++ b/third_party/blink/renderer/modules/accessibility/ax_menu_list_popup.cc
 @@ -149,10 +149,11 @@ void AXMenuListPopup::DidUpdateActiveOption(int option_index,
@@ -446,29 +589,39 @@ index e9194238c..e4fe47a85 100644
  
  void AXMenuListPopup::DidShow() {
 diff --git a/third_party/blink/renderer/platform/graphics/highcontrast/highcontrast_classifier.cc b/third_party/blink/renderer/platform/graphics/highcontrast/highcontrast_classifier.cc
-index c9093a9b8..bb63ec4fb 100644
+index c9093a9b8..b78910b7b 100644
 --- a/third_party/blink/renderer/platform/graphics/highcontrast/highcontrast_classifier.cc
 +++ b/third_party/blink/renderer/platform/graphics/highcontrast/highcontrast_classifier.cc
-@@ -1127,7 +1127,7 @@ void Inference(
+@@ -1127,7 +1127,6 @@ void Inference(
      ,
      FixedAllocations* __restrict fixed) {
    const int32_t input0_shape[] = {1, 4};
 -  int32_t logits_MatMul_merged_with_dnn_logits_BiasAdd0_shape[2];
-+  // int32_t logits_MatMul_merged_with_dnn_logits_BiasAdd0_shape[2];
  
    // dnn/hiddenlayer_0/MatMul_merged_with_dnn/hiddenlayer_0/BiasAdd
    FullyConnected<float>(input0_shape, input0,
-@@ -1150,8 +1150,8 @@ void Inference(
+@@ -1150,8 +1149,6 @@ void Inference(
        dnn_logits_weights_part_0.values, dnn_logits_biases_part_0_shape,
        dnn_logits_biases_part_0.values,
        logits_MatMul_merged_with_dnn_logits_BiasAdd0);
 -  logits_MatMul_merged_with_dnn_logits_BiasAdd0_shape[0] = 1;
 -  logits_MatMul_merged_with_dnn_logits_BiasAdd0_shape[1] = 1;
-+  // logits_MatMul_merged_with_dnn_logits_BiasAdd0_shape[0] = 1;
-+  // logits_MatMul_merged_with_dnn_logits_BiasAdd0_shape[1] = 1;
  }
  
  }  // namespace highcontrast_tfnative_model
+diff --git a/third_party/blink/renderer/platform/scheduler/base/task_queue_impl.h b/third_party/blink/renderer/platform/scheduler/base/task_queue_impl.h
+index 471e60bec..2507d71e3 100644
+--- a/third_party/blink/renderer/platform/scheduler/base/task_queue_impl.h
++++ b/third_party/blink/renderer/platform/scheduler/base/task_queue_impl.h
+@@ -87,7 +87,7 @@ class PLATFORM_EXPORT TaskQueueImpl {
+       if (time == other.time) {
+         // Debug gcc builds can compare an element against itself.
+         DCHECK(sequence_num != other.sequence_num || this == &other);
+-        return (sequence_num - other.sequence_num) < 0;
++        return ((this == &other) || (sequence_num - other.sequence_num) < 0);
+       }
+       return time < other.time;
+     }
 diff --git a/third_party/blink/renderer/platform/wtf/text/text_codec.h b/third_party/blink/renderer/platform/wtf/text/text_codec.h
 index 5bc0c2793..daabf7adf 100644
 --- a/third_party/blink/renderer/platform/wtf/text/text_codec.h
@@ -486,19 +639,6 @@ index 5bc0c2793..daabf7adf 100644
  
  class WTF_EXPORT TextCodec {
    USING_FAST_MALLOC(TextCodec);
-diff --git a/ui/events/x/keyboard_hook_posix.cc b/ui/events/x/keyboard_hook_posix.cc
-index 17c59bdcd..4b44baf66 100644
---- a/ui/events/x/keyboard_hook_posix.cc
-+++ b/ui/events/x/keyboard_hook_posix.cc
-@@ -17,7 +17,7 @@ namespace {
- class KeyboardHookPosix : public KeyboardHookBase {
-  public:
-   KeyboardHookPosix(base::Optional<base::flat_set<int>> native_key_codes,
--                    KeyEventCallback callback);
-+                    KeyEventCallback callback) __attribute__ ((unused));
-   ~KeyboardHookPosix() override;
- 
-  private:
 diff --git a/ui/gfx/break_list.h b/ui/gfx/break_list.h
 index cb3de2b76..de202627d 100644
 --- a/ui/gfx/break_list.h
@@ -514,19 +654,6 @@ index cb3de2b76..de202627d 100644
  }
  #endif
  
-diff --git a/ui/gfx/ipc/buffer_types/gfx_param_traits.cc b/ui/gfx/ipc/buffer_types/gfx_param_traits.cc
-index 483342692..99f36c102 100644
---- a/ui/gfx/ipc/buffer_types/gfx_param_traits.cc
-+++ b/ui/gfx/ipc/buffer_types/gfx_param_traits.cc
-@@ -30,7 +30,7 @@ bool ParamTraits<gfx::BufferUsageAndFormat>::Read(
- void ParamTraits<gfx::BufferUsageAndFormat>::Log(
-     const gfx::BufferUsageAndFormat& p,
-     std::string* l) {
--  l->append(base::StringPrintf("(%d, %d)", p.usage, p.format));
-+  l->append(base::StringPrintf("(%d, %d)", (int)p.usage, (int)p.format));
- }
- 
- }  // namespace IPC
 diff --git a/ui/gfx/ipc/skia/gfx_skia_param_traits_macros.h b/ui/gfx/ipc/skia/gfx_skia_param_traits_macros.h
 index e48af3f0a..5f5b5c3e3 100644
 --- a/ui/gfx/ipc/skia/gfx_skia_param_traits_macros.h
@@ -541,21 +668,6 @@ index e48af3f0a..5f5b5c3e3 100644
 +IPC_ENUM_TRAITS_VALIDATE(SkAlphaType, kLastEnum_SkAlphaType != 0);
  
  #endif  // UI_GFX_IPC_SKIA_GFX_SKIA_PARAM_TRAITS_MACROS_H_
-diff --git a/ui/gfx/paint_vector_icon.cc b/ui/gfx/paint_vector_icon.cc
-index d2968ffe3..2b3043c21 100644
---- a/ui/gfx/paint_vector_icon.cc
-+++ b/ui/gfx/paint_vector_icon.cc
-@@ -537,8 +537,9 @@ IconDescription::IconDescription(const VectorIcon& icon,
- 
-   // If an icon has a .1x.icon version, it should only be rendered at the size
-   // specified in that definition.
--  if (icon.rep_1x)
-+  if (icon.rep_1x) {
-     DCHECK_EQ(this->dip_size, GetDefaultSizeOfVectorIcon(icon));
-+  }
- }
- 
- IconDescription::~IconDescription() {}
 diff --git a/ui/gfx/render_text.cc b/ui/gfx/render_text.cc
 index 39702db77..11c24a6d6 100644
 --- a/ui/gfx/render_text.cc
@@ -571,14 +683,17 @@ index 39702db77..11c24a6d6 100644
    Vector2d offset;
    HorizontalAlignment horizontal_alignment = GetCurrentHorizontalAlignment();
    if (horizontal_alignment != ALIGN_LEFT) {
---- a/third_party/blink/renderer/platform/scheduler/base/task_queue_impl.h	2018-07-26 23:34:16.896452901 -0400
-+++ b/third_party/blink/renderer/platform/scheduler/base/task_queue_impl.h	2018-07-26 23:35:43.273634510 -0400
-@@ -87,7 +87,7 @@
-       if (time == other.time) {
-         // Debug gcc builds can compare an element against itself.
-         DCHECK(sequence_num != other.sequence_num || this == &other);
--        return (sequence_num - other.sequence_num) < 0;
-+        return ((this == &other) || (sequence_num - other.sequence_num) < 0);
-       }
-       return time < other.time;
-     }
+--- a/chrome/test/BUILD.gn	2018-08-24 12:45:31.929527483 -0400
++++ b/chrome/test/BUILD.gn	2018-08-24 12:43:30.926082904 -0400
+@@ -3692,7 +3692,7 @@
+       "//ui/wm",
+     ]
+   }
+-  if (!is_chromeos && is_linux) {
++  if (!is_chromeos && is_linux && !use_aura) {
+     sources += [
+       "../browser/password_manager/native_backend_kwallet_x_unittest.cc",
+       "../browser/shell_integration_linux_unittest.cc",
+-- 
+2.17.1
+

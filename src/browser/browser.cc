@@ -68,8 +68,7 @@ namespace content {
     WebContents::CreateParams create_params(browser_context_.get());
     create_params.initial_size = window_size;
     create_params.initially_hidden = false;
-    web_contents_.reset(
-      WebContents::Create(create_params));
+    web_contents_ = WebContents::Create(create_params);
 
     screen_->host()->SetBoundsInPixels(gfx::Rect(window_size));
     screen_->host()->Show();
